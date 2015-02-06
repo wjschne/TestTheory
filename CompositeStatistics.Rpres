@@ -1,0 +1,386 @@
+```{r cacheset, include=FALSE}
+library(knitr)
+opts_chunk$set(cache=FALSE)
+```
+
+Composite Statistics
+========================================================
+author: W. Joel Schneider
+transition: none
+css: slides.css
+
+[Psychology 442](http://my.ilstu.edu/~wjschne/442/Psy442SP15.html)
+
+```{r setup,echo=FALSE,message=FALSE}
+# slides.css is here: https://www.dropbox.com/s/lci000xtt934zw0/slides.css?dl=0
+library(knitr)
+fast<-TRUE # TRUE: Compile quickly; FALSE: Better quality
+
+if (fast) {
+  dfont = "serif" # Default font for quick compile
+  fastDev="png"  # Default image device for quick compile
+  knitr::opts_chunk$set(dev="png", fig.width=10, fig.height = 7.5, echo=FALSE)
+
+} else {
+ dfont = "play" # Default font for slow compile
+ fastDev="svg" # Default image device for slow compile
+ library(showtext) # Often causes a JSON error. Try again immediately.
+ font.add.google("Playfair Display", "play") 
+ # font.add.google("Noto Serif", "noto")   
+ 
+ knitr::opts_chunk$set(dev="svg", fig.width=8, fig.height = 6,fig.showtext=TRUE,tidy=TRUE,tidy.opts=list(blank=FALSE, width.cutoff=40), echo=FALSE, family=dfont)
+}
+
+iGreek <- function(s="alpha",bq=FALSE){
+  strGreek <- c("alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta", "iota", "kappa", "lambda", "mu", "nu", "xi", "omicron", "pi", "rho", "sigma", "tau", "upsilon", "phi", "chi", "psi", "omega","Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta", "Eta", "Theta", "Iota", "Kappa", "Lambda", "Mu", "Nu", "Xi", "Omicron", "Pi", "Rho", "Sigma", "Tau", "Upsilon", "Phi", "Chi", "Psi", "Omega")
+  intGreek <- c(945:961,963:969,913:937)
+  names(intGreek)<-strGreek
+  if(bq) bquote(italic(.(intToUtf8(intGreek[s])))) else intToUtf8(intGreek[s])
+  
+}
+```
+
+The Mean of the Sum...
+======================
+incremental:true
+
+### ... is the sum of the means
+
+The Sum
+=========================
+incremental:true
+
+$$\boldsymbol{X}=\{X_1,...,X_k\}$$
+
+$$\boldsymbol{x}=\{x_1,...,x_k\}$$
+
+$$x_S=\sum_{i=1}^{k}{x_i}=\boldsymbol{1'x}$$
+
+$$\boldsymbol{1'x}=\begin{bmatrix} 1\\ 1\\ 1 \end{bmatrix}'
+\begin{bmatrix}x_1\\ x_2\\ x_3 \end{bmatrix} = 
+\begin{bmatrix} 1&1&1\end{bmatrix}
+\begin{bmatrix}x_1\\ x_2\\ x_3\end{bmatrix}
+=1 \times x_1 + 1 \times x_2 + 1 \times x_3 = x_S$$
+
+The Sum
+=========================
+
+```{r sumVector, echo=TRUE}
+x <- c(1,2,3)
+one <- rep(1,length(x)) # A vector of ones
+
+xsum <- t(one) %*% x # The Matrix-Algebra Masochist Method
+xsum <- sum(x) # The sane person's method
+```
+
+Therefore $`r paste(x,collapse="+")` = `r xsum`$.
+
+Calculate the Mean of a Sum
+===============================
+incremental:true
+
+$\boldsymbol{X}$ has means in vector $\boldsymbol{\mu}$
+
+or
+
+$\{X_1,...,X_k\}$ has means $\{\mu_1,...,\mu_k\}$
+
+$$\mu_{S}=\sum_{i=1}^{k}{\mu_i}=\boldsymbol{1'\mu}$$
+
+
+Calculate the Mean of a Weighted Sum
+===============================
+incremental:true
+
+If $x_S=\sum_{i=1}^{k}{w_i x_i}=\boldsymbol{w'x}$
+
+Then $\mu_S=\sum_{i=1}^{k}{w_i\mu_i}=\boldsymbol{w'\mu}$
+
+
+```{r WeightedSum, echo=-5}
+mu <- c(50,58,62) # mean vector
+w <- c(0.5,1,2) # vector weights
+wmu <- t(w) %*% mu # weighted mean (MAMM)
+wmu <- sum(w*mu) # Sane person's method
+eqwmu <- paste0(paste(apply(cbind(w,mu),MARGIN = 1,FUN = paste,collapse=" \\times "),collapse=" + ")," = ",wmu)
+```
+
+The weighted mean is: $`r eqwmu`$
+
+The Variance of the the Sum...
+==================================
+incremental: true
+
+### ... is the sum of the covariance matrix
+
+Covariance Matrix
+=====================================
+incremental: true
+
+$\sigma_{ij}$ = covariance between $X_i$ and $X_j$
+
+$$\sigma_{ij}=\sigma_i \sigma_j \rho_{ij}$$
+
+$$\Sigma=\begin{matrix}
+\sigma_i^2 & \sigma_{ij}\\
+\sigma_{ji} & \sigma_j^2
+\end{matrix}$$ 
+
+The Variance of the Sum
+=====================================
+incremental: true
+
+$$\sigma_{X_S}^2=\sum_{i=1}^{k}{\sum_{j=1}^{k}{\sigma_{ij}}}=\boldsymbol{1'\Sigma 1}$$
+
+The diag Function (Number to Identity Matrix)
+==============================================
+incremental: true
+
+```{r diagNumIdentity,echo=TRUE}
+diag(3)
+```
+
+
+The diag Function (Matrix to Vector)
+================================
+incremental: true
+
+If $\boldsymbol{A}$ is a matrix,
+
+$$A_{k,k} =
+ \begin{bmatrix}
+  \color{red}{a_{1,1}} & a_{1,2} & \cdots & a_{1,k} \\
+  a_{2,1} & \color{red}{a_{2,2}} & \cdots & a_{2,k} \\
+  \vdots  & \vdots  & \color{red}{\ddots} & \vdots  \\
+  a_{k,1} & a_{k,2} & \cdots & \color{red}{a_{k,k}}
+ \end{bmatrix}$$
+ 
+then
+ 
+ $$\mathtt{diag}(\boldsymbol{A}) = \color{red}{\{a_{1,1},a_{2,2},...,a_{k,k}\}}$$
+ 
+```{r diagMatrixVector,echo=TRUE}
+diag(matrix(1:4,nrow=2))
+```
+ 
+The diag Function (Vector to Matrix)
+================================
+incremental: true
+
+If $\boldsymbol{a}$ is a vector,
+
+$$\boldsymbol{a} = \{a_{1,1},a_{2,2},...,a_{k,k}\}$$
+ 
+then
+ 
+$$\mathtt{diag}(\boldsymbol{a}) = 
+\begin{bmatrix}
+  a_{1} & 0 & \cdots & 0 \\
+  0 & a_{2} & \cdots & 0 \\
+  \vdots  & \vdots  & \ddots & \vdots  \\
+  0 & 0 & \cdots & a_{k}
+ \end{bmatrix}$$
+ 
+```{r diagVectorMatrix,echo=TRUE}
+diag(1:4)
+```
+
+The diag function is useful!
+==============================
+
+Replace the diagonal of a matrix with a vector of your choice:
+```{r diagReplace,echo=TRUE}
+A <- matrix(1:9,nrow=3) # Make a matrix.
+A
+diag(A)<- c(100,200,300) # Replace the diagonal of A
+A
+```
+
+
+Correlation to Covariance
+============================
+
+$$\begin{align*}
+\boldsymbol{\Sigma}&=\mathtt{diag}(\boldsymbol{\sigma}) \boldsymbol{R}\, \mathtt{diag}(\boldsymbol{\sigma})\\ 
+&=\begin{bmatrix}
+  \sigma_{1} & 0 & \cdots & 0 \\
+  0 & \sigma_{2} & \cdots & 0 \\
+  \vdots  & \vdots  & \ddots & \vdots  \\
+  0 & 0 & \cdots & \sigma_{k}
+ \end{bmatrix}
+  \begin{bmatrix}
+  1 & \rho_{1,2} & \cdots & \rho_{1,k} \\
+  \rho_{2,1} & 1 & \cdots & \rho_{2,k} \\
+  \vdots  & \vdots  & \ddots & \vdots  \\
+  \rho_{k,1} & \rho_{k,2} & \cdots & 1
+ \end{bmatrix}
+\begin{bmatrix}
+  \sigma_{1} & 0 & \cdots & 0 \\
+  0 & \sigma_{2} & \cdots & 0 \\
+  \vdots  & \vdots  & \ddots & \vdots  \\
+  0 & 0 & \cdots & \sigma_{k}
+ \end{bmatrix}\\
+  &=  \begin{bmatrix}
+  \sigma_{1}^2 & \sigma_{1}\sigma_{2}\rho_{1,2} & \cdots & \sigma_{1}\sigma_{k}\rho_{1,k} \\
+  \sigma_{2}\sigma_{1}\rho_{2,1} & \sigma_{2}^2 & \cdots & \sigma_{2}\sigma_{k}\rho_{2 k} \\
+  \vdots  & \vdots  & \ddots & \vdots  \\
+  \sigma_{k}\sigma_{1}\rho_{k,1} & \sigma_{k}\sigma_{2}\rho_{k,2} & \cdots & \sigma_{k}^2
+ \end{bmatrix}
+   =  \begin{bmatrix}
+  \sigma_{1}^2 & \sigma_{1,2} & \cdots & \sigma_{1,k} \\
+  \sigma_{2,1} & \sigma_{2}^2 & \cdots & \sigma_{2,k} \\
+  \vdots  & \vdots  & \ddots & \vdots  \\
+  \sigma_{k,1} & \sigma_{k,2} & \cdots & \sigma_{k}^2
+ \end{bmatrix}
+\end{align*}$$
+
+```{r Cor2Cov,eval=FALSE,echo=TRUE}
+BigSigma <- diag(sigma) %*% R %*% diag(sigma)
+```
+
+The Variance of a Sum
+===============================
+incremental: true
+
+$$\sigma_{X_S}^2=\sum_{i=1}^{k}{\sum_{j=1}^{k}{\sigma_{ij}}}=\boldsymbol{1'\Sigma 1}$$
+
+```{r VarianceSum,eval=TRUE,echo=TRUE}
+KM <- matrix(c(100,50,50,100),nrow=2) # Covariance Matrix
+rownames(KM) <- colnames(KM) <- c("X","Y")
+KM
+one  <- rep(1,nrow(KM)) # Vector of ones
+VarSum <- one %*% KM %*% one # Variance of sum (MAMM)
+VarSum <- sum(KM) # Sane person's method
+VarSum
+```
+
+The Variance of a Weighted Sum
+===============================
+incremental: true
+
+$$\sigma_S^2=\sum_{i=1}^{k}{\sum_{j=1}^{k}{w_i w_j \sigma_{ij}}}=\boldsymbol{w'\Sigma w}$$
+
+```{r WeightedVarSum,eval=FALSE,echo=TRUE}
+WeightedVarSum <- t(w) %*% CM %*% w
+```
+
+
+Composite Correlations
+================================
+incremental:true
+
+$$\begin{matrix}\begin{matrix}
+\hline
+\color{red}{A} & \color{blue}{B}\\
+\hline
+\color{red}{1} & \color{blue}{0}\\
+\color{red}{1} & \color{blue}{0}\\
+\color{red}{0} & \color{blue}{1}\\
+\color{red}{0} & \color{blue}{1}\\
+\hline
+\end{matrix}
+&
+\begin{matrix}
+\hline
+ & \color{red}{A_1}&\color{red}{A_2} &\color{blue}{B_1} &\color{blue}{B_2} \\
+ \hline
+   \color{red}{A_1}&\color{red}{1.00}&\color{red}{0.3}&\color{purple}{0.35}&\color{purple}{0.40}\\
+   \color{red}{A_2}&\color{red}{0.30}&\color{red}{1.0}&\color{purple}{0.42}&\color{purple}{0.48}\\
+   \color{blue}{B_1}&   &   &\color{blue}{1.00}&\color{blue}{0.56}\\
+   \color{blue}{B_2}&   &   &\color{blue}{0.56}&\color{blue}{1.00}\\
+\hline
+\end{matrix}\end{matrix}$$
+
+$$r_{AB}=\dfrac{\color{purple}{\text{Sum of Correlations between A and B}}}{\sqrt{\color{red}{\text{Sum of Correlations Within A}}\times\color{blue}{{\text{Sum of Correlations Within B}}}}}$$
+
+$$\Sigma_{AB}=W'RW$$
+
+$$\boldsymbol{\sigma}=\mathtt{diag}(\sqrt{\mathtt{diag}(\Sigma_{AB})})$$
+
+$$\boldsymbol{R}_{AB}=\boldsymbol{\sigma}^{-1}\Sigma_{AB}\boldsymbol{\sigma}^{-1}$$
+
+
+
+Weight Matrix
+================================
+
+Making matrices quickly is made easier with [this Excel tool](http://my.ilstu.edu/~wjschne/AssessingPsyche/ExcelToRMatrix.xlsm).
+
+```{r Weight Matrix,echo=TRUE}
+W <- matrix(c(
+  1,0,0,0,1,0,1, #A1
+	0,1,0,0,1,0,1, #A2
+	0,0,1,0,0,1,1, #B1
+	0,0,0,1,0,1,1), nrow= 4, byrow=TRUE) #B2
+rownames(W) <- WRows <- c("A1", "A2", "B1", "B2")
+colnames(W) <- WCols <- c("A1", "A2", "B1", "B2", "A", "B", "ABTotal")
+kable(W,align = "c")
+```
+
+
+Original Correlation Matrx
+=====================
+
+```{r RHOMatrix, echo=TRUE}
+RHO <- matrix(c(
+  1,0.3,0.35,0.4, #A1
+	0.3,1,0.42,0.48, #A2
+	0.35,0.42,1,0.56, #B1
+	0.4,0.48,0.56,1), nrow= 4, byrow=TRUE) #B2
+colnames(RHO) <- rownames(RHO) <- RHONames <- c("A1", "A2", "B1", "B2")
+kable(RHO,align = "c")
+```
+
+Composite Covariance Matrix
+=================================
+
+```{r BigSigmaMatrix, echo=TRUE}
+BigSigma <- t(W) %*% RHO %*% W # Covariance Matrix
+kable(BigSigma,digit=2,align = "c")
+```
+
+Composite Correlation Matrix
+=================================
+
+```{r BigRhoMatrix, echo=TRUE}
+BigRho <- cov2cor(BigSigma) # Sane person's method
+isigma <- solve(diag(diag(BigSigma)^0.5)) # Inverted standard deviations
+BigRho <- isigma %*% BigSigma %*% isigma # MAMM method
+colnames(BigRho)  <- rownames(BigRho)  <- WCols
+kable(BigRho,digit=2,align = "c")
+```
+
+In-Class Exercise
+===========================
+
+```{r InClass,eval=FALSE, echo=FALSE}
+Math.R <- matrix(c(
+  1,0.473,0.505,0.46,0.49,0.5, #Math.Applied
+	0.473,1,0.523,0.566,0.361,0.373, #Fluid.Reasoning
+	0.505,0.523,1,0.458,0.422,0.443, #Working.Memory
+	0.46,0.566,0.458,1,0.323,0.279, #Comprehension.Knowledge
+	0.49,0.361,0.422,0.323,1,0.64, #Math.Calculation
+	0.5,0.373,0.443,0.279,0.64,1), nrow= 6, byrow=TRUE) #Math.Fluency
+colnames(Math.R) <- rownames(Math.R) <- Math.RNames <- c("Math.Applied", "Fluid.Reasoning", "Working.Memory", "Comprehension.Knowledge", "Math.Calculation", "Math.Fluency")
+library(xtable)
+xtable(Math.R)
+kable(Math.R,digit=3,align="c")
+```
+
+$$\begin{matrix}
+  \hline
+ & MA & FR & WM & CK & MC & MF \\ 
+  \hline
+Math.Applied & 1 & 0.473 & 0.505 & 0.460 & 0.490 & 0.500 \\ 
+Fluid.Reasoning & \color{red}{0.473} & \color{blue}{1} & \color{blue}{0.523} & \color{blue}{0.566} & \color{blue}{0.361} & \color{blue}{0.373} \\ 
+Working.Memory & \color{red}{0.505} & \color{blue}{0.523} & \color{blue}{1} & \color{blue}{0.458} & \color{blue}{0.422} & \color{blue}{0.443} \\ 
+Comprehension.Knowledge & \color{red}{0.460} & \color{blue}{0.566} & \color{blue}{0.458} & \color{blue}{1} & \color{blue}{0.323} & \color{blue}{0.279} \\ 
+Math.Calculation & \color{red}{0.490} & \color{blue}{0.361} & \color{blue}{0.422} & \color{blue}{0.323} & \color{blue}{1} & \color{blue}{0.640} \\ 
+Math.Fluency & \color{red}{0.500} & \color{blue}{0.373} & \color{blue}{0.443} & \color{blue}{0.279} & \color{blue}{0.640} & \color{blue}{1} \\ 
+   \hline
+\end{matrix}$$
+
+If $Y=Math.Applied$, how correlated is $\hat{Y}$ with $Y$ and also with its predictors?
+
+Asumme all scores $\sim N(0,1^2)$
+$$\mathbb{\beta}=\color{blue}{\mathbb{\Sigma}_{XX}^{-1}}\color{red}{\mathbb{\Sigma}_{XY}}$$

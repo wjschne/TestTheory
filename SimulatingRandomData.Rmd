@@ -1,0 +1,716 @@
+---
+title: "Simulating Random Variables"
+author: "W. Joel Schneider"
+date: "Test Theory (Psychology 442)"
+output:
+  html_document:
+    includes:
+      in_header: header.html
+    theme: null
+    toc: yes
+---
+
+
+```{r cacheknitr, include=FALSE}
+knitr::opts_chunk$set(cache=TRUE)
+```
+
+The .css file that accompanies this document is [here](http://my.ilstu.edu/~wjschne/442/RMarkdownStyle.css). Download it to the same folder in which you save this document.
+
+Sometimes the you have to *knit* the document twice in order for the Google web font to load properly. If you want to knit the file rapidly, set `PrettyFont` to `FALSE` in the (hidden) codechunk below. The picture quality will be lower. Also, some people have at trouble with the `svg` device not working with Macs and thus switching `PrettyFont` to `FALSE` is a workaround. A pretty version of this document is [here](http://my.ilstu.edu/~wjschne/442/SimulatingRandomData.html).
+
+\(\require{color}\)
+
+```{r setup,echo=FALSE,message=FALSE}
+PrettyFont <- FALSE # Change to FALSE if you wish to to compile the code rapidly.
+library(knitr)
+if (PrettyFont) {
+  library(showtext)
+font.add.google("Tinos", "tinos")
+font.add.google("Playfair Display", "play")
+dfont <- "play"
+opts_chunk$set(dev="svg", tidy=TRUE,tidy.opts=list(blank=FALSE, width.cutoff=40),fig.showtext=PrettyFont)
+} else {
+dfont <- "serif"
+opts_chunk$set(dev="png", dev.args=list(type="cairo"), tidy=TRUE,tidy.opts=list(blank=FALSE, width.cutoff=40),fig.showtext=PrettyFont)
+}
+
+knit_hooks$set(pmf = function(before, options, envir) {
+    if (before) par(pch=16, bty="n",col="royalblue2",lty=3,mar=c(5,5,4,1)+0.1,las=1, family=dfont)   
+})
+
+knit_hooks$set(cdf = function(before, options, envir) {
+    if (before) par(pch=16, bty="n",col="firebrick2",lty=3,mar=c(5,5,4,1)+0.1,las=1, family=dfont)   
+})
+
+knit_hooks$set(barplot = function(before, options, envir) {
+    if (before) par(col="royalblue2",mar=c(5,5,4,1)+0.1, family=dfont)   
+})
+```
+
+Symbols           | Meaning
+:-----------------|:---------------
+$\mathbb{R}$      | Real Numbers
+$\mathbb{R}_{>0}$ | Positive Real Numbers
+$\mathbb{Z}$      | Integers
+$\mathbb{N}_1$    | Natural Numbers $\{1,2,3,\ldots\}$
+$\mathbb{N}_0$    | Non-Negative Integers $\{0,1,2,3,\ldots\}$
+$\in$             | Is a member of (e.g., $X \in \mathbb{Z}$ means that $X$ is a member of the set of all integers)
+$[a,b]$           | Interval from $a$ to $b$, inclusive
+$(a,b)$           | Interval from $a$ to $b$, exclusive
+$\{a,b\}$         | Just the elements $a$ and $b$
+$\binom{n}{k}$      | The *binomial coefficient*. $\binom{n}{k}=\frac{n!}{k!\left(n-k\right)!}$. Read aloud, $\binom{n}{k}$ is "$n$ choose $k$" or the number of combinations that $n$ things have when taken $k$ at a time.
+$f_X(x;\boldsymbol{\theta})$ | The probability density function or probability mass function of $X$ with parameters $\boldsymbol{\theta}$
+$F_X(x;\boldsymbol{\theta})$ | The cumulative distribution function of $X$ with parameters $\boldsymbol{\theta}$
+$E(X)$              | The expected value of $X$
+$\mu_X, m_X$        | The population and sample mean of $X$
+$\sigma_X, s_X$     | The population and sample standard deviation of $X$
+$\sigma_X^2, s_X^2$ | The population and sample variance of $X$
+$\gamma_1, g_1$     | The population and sample skewness
+$\gamma_2, g_2$     | The population and sample kurtosis
+$\boldsymbol{R_X}$  | The correlation matrix of the variables in vector $\boldsymbol{X}$
+$\boldsymbol{A'}$           | The transpose of matrix $\boldsymbol{A}$
+$\boldsymbol{A}^{-1}$       | The inverse of matrix $\boldsymbol{A}$
+$\mathtt{diag}(\boldsymbol{A})$ | The column vector formed from the diagonal of matrix $\boldsymbol{A}$
+$\mathtt{diag}(\boldsymbol{a})$ | The diagonal matrix formed from column vector $\boldsymbol{a}$
+$\boldsymbol{1}$ | A column vector of ones. Its length can be inferred by context.
+$\boldsymbol{I}$ | An identity matrix. Its dimensions can be inferred by context.
+
+Table: Notation
+
+# Discrete Uniform Distribution
+
+In a *discrete uniform distribution*, the sample space is countable and every element of the sample space is equally probable.
+
+It is possible to consider a discrete uniform distribution consisting of real numbers at regular intervals but will we restrict our view to the kind of discrete uniform distribution consisting of consecutive integers.
+
+## Parameters &amp; Descriptives
+
+Property | Symbol
+:---------|:------
+Lower bound     | $a \in \mathbb{Z}$
+Upper bound     | $b \in \mathbb{Z}; b > a$
+Sample Space    | $x \in \{a,a+1,\ldots,b\}$
+Number of points| $n = b-a+1$
+Mean            | $\mu=\dfrac{a+b}{2}$
+Variance        | $\sigma^2=\dfrac{n^2-1}{12}$
+Skewness        | $\gamma_1=0$
+Kurtosis        | $\gamma_2=-\dfrac{6(n^2+1)}{5(n^2-1)}$
+
+Table: Discrete Uniform Distribution
+
+## Probability Mass Function
+
+$$\color[named]{RoyalBlue}{f_X(x;a,b)=\dfrac{1}{b-a+1}}$$
+
+For a six-sided die, 
+
+$$f_X(x;a=1,b=6)=\dfrac{1}{6}$$
+
+The default plot of the probability mass function:
+```{r barebones}
+a <- 1 # Minimum
+b <- 6 # Maximum
+n <- b - a+ 1 # Number of points
+x <- seq(a,b) # Sample space
+pmf <- rep(1/n,n) # Values for the probability mass function
+plot(x,pmf) # Bare-bones plot
+```
+
+You can make plots look more to your liking by setting some parameters using the `par` function.
+
+```{r parstuff,eval=FALSE}
+# Set graphing parameters
+par(pch=16, bty="n",col="royalblue2",lty=3,las=1,family="serif")
+
+# To make par settings persist across knitr code chunks:
+knitr::opts_knit$set(global.par = TRUE)
+
+# Another way to make things less tedious is to make a wrapper function in which your settings are the defaults:
+pmfPlot <- function (x,y,pch=16, bty="n",col="royalblue2",lty=3,las=1,family="serif",xlab="Sample Space",ylab="Probability",type="b",...) {
+  plot(x,y,pch=pch,bty=bty,col=col,lty=lty,las=las,family=family,xlab=xlab,ylab=ylab,type=type,...)    
+}
+
+# Example:
+pmfPlot(0:10,dpois(0:10,lambda = 3),main="Awesome!")
+
+# If you want all your new plots to have new defaults, try this:
+setHook("plot.new", function() par(pch=16, bty="n",col="royalblue2",family="serif"))
+# If you put this setHook function in your .RProfile file, it will run whenever you open RStudio and you won't have to worry about running it.
+```
+
+- `pch` sets the point type. 16 is a filled circle with no border.
+- `bty` sets the box around the plot. "n" suppresses the box.
+- `col` sets the default color of what is plotted.
+- `lty` sets the line type. 3 is a dotted line.
+- `las` sets the orientation of the axis labels. 1 is horizontal.
+- `family` sets font family.
+
+There are many more parameters that can be set. Type `?par` to learn more.
+
+Many `par` parameters can be set within the `plot` function.
+
+- `type` sets the kind of plot you make. `"l"` = line, `"p"` = point, `"b"` = both line and point
+- `xlim` sets the range on the *x*-axis
+- `ylim` sets the range on the *y*-axis
+- `xlab` sets the label on the *x*-axis
+- `ylab` sets the label on the *y*-axis
+- `main` sets the plot title
+
+```{r DiscretePMF,pmf=TRUE}
+plot(x,pmf,type="b",ylim=c(0,1),main="Discrete Uniform PMF",xlab="Sample Space",ylab="Probability")
+```
+
+## Cumulative Disribution Function
+
+$$\color[named]{BrickRed}{F_X(x;a,b)=\dfrac{x-a+1}{b-a+1}}$$
+
+```{r DiscreteCDF,cdf=TRUE}
+cdf <- (x-a+1) / n # Cumulative distribution function
+plot(x,cdf,type="b",ylim=c(0,1),main="Discrete Uniform CDF",xlab="Sample Space",ylab="Cumulative Probability")
+```
+
+## Generating Random Data
+
+We can make use of the `sample` function to generate data from a discrete uniform distribution. 
+
+`sample(x, size, replace=FALSE, prob=NULL)`
+
+Argument|Explanation
+:-------|:----------
+`x`| A vector of the entire sample space
+`size`| The sample size
+`replace`|*opt.* Sample with replacement? Default: `FALSE`
+`prob`|*opt.* A vector of the probability mass function. Default: `NULL` (Results in uniform distribution)
+
+We will also use the `table` function to compute the frequencies of the random data. To create the frequency table with the `kable` function from the `knitr` package, we need to convert the table into a data frame.
+
+```{r DiscreteTable}
+SampleSize <- 10000
+y <- sample(x,size=SampleSize,replace=TRUE)
+Frequency<-table(y) # Compute frequencies
+kable(as.data.frame(Frequency),col.names = c("X","Freq.")) # Make frequency table
+```
+
+The default plot for the output of a table:
+```{r DiscreteDefault}
+plot(Frequency)
+```
+
+Plot with points and lines:
+
+```{r DiscretePoints,pmf=TRUE,fig.showtext=PrettyFont}
+plot(Frequency,type="b",ylim=c(0,2000),
+     main="Empirical Frequencies of Random Discrete Uniform Data",xlab="Sample Space",ylab="Frequency")
+text(x,Frequency,labels=Frequency,pos=3)
+```
+
+Create a barplot by converting *y* to a nominal variable using the `factor` function.
+
+```{r DiscreteBarPlot,fig.showtext=PrettyFont,barplot=TRUE}
+bp <- plot(factor(y,levels=x),ylim=c(0,2000),main="Empirical Frequencies of Random Discrete Uniform Data",xlab="Sample Space",ylab="Frequency",border=FALSE,col="royalblue2") 
+text(bp,Frequency,Frequency,pos=3,xpd=TRUE)
+```
+
+# Bernoulli Distribution
+
+In some ways, the *Bernoulli distribution* is the simplest possible. There are only two values in the sample space {0,1} and only one parameter, *p*, the probabiliy that the value will be 1 (sometimes called a "success").
+
+## Parameters &amp; Descriptives
+
+Property | Symbol
+:---------|:------
+Sample space    | $x \in \{0,1\}$
+Probability of "Success"     | $p \in [0,1]$
+Probability of "Failure"     | $q=1-p$
+Mean            |$\mu = p$
+Variance        | $\sigma^2=pq$
+Skewness        | $\gamma_1=\dfrac{1-2p}{\sigma}$
+Kurtosis        | $\gamma_2=\dfrac{1}{\sigma^{2}}-6$
+
+Table: Bernoulli Distribution
+
+
+## Probability Mass Function
+
+$$\color[named]{RoyalBlue}{f_X(x;p)=p^x(1-p)^{1-x}}$$
+
+```{r BernoulliPMF,fig.showtext=PrettyFont,barplot=TRUE}
+x <- 0:1 # Sample space
+names(x) <- c("Failure","Success")
+p <- 0.8 # Probability of success
+pmf <- p^x * (1-p)^(1-x)
+barplot(pmf,main=bquote(bold("Bernoulli PMF ("*italic(p)==.(p)*")")),ylim=c(0,1),ylab="Probability",border=FALSE,col="royalblue2")
+```
+
+## Cumulative Distribution Function
+
+$$\color[named]{BrickRed}{F_X(x;p)=(1-p)^{1-x}}$$
+
+## Generating Random Data
+
+```{r BernoulliRandom,fig.showtext=PrettyFont,barplot=TRUE}
+y <- sample(x,size = SampleSize,replace = TRUE,prob = c(1-p,p))
+bp <- plot(factor(y,levels=x,labels=names(x)),main=paste0("Empirical Frequencies of Random Bernoulli Data (p=",p,")"),xlab="Sample Space",ylab="Frequency",ylim=c(0,SampleSize),border=FALSE,col="royalblue2") 
+text(bp,table(y),table(y),pos=3,xpd=TRUE)
+```
+
+# Binomial Distribution
+
+The *binomial distribution* occurs when independent random variables with the same Bernoulli distribution are added together. For example, if we were to repeatedly toss 20 coins simultaneously and count how many heads there are after each toss, the distribution of the total number of heads would have a binomial distribution.
+
+## Parameters &amp; Descriptives
+
+Property | Symbol
+:---------|:------
+Number of trials|$n \in \mathbb{N}_1$
+Sample space     | $x \in \{0,1,\ldots,n\}$
+Probability of "Success"     | $p \in [0,1]$
+Probability of "Failure"     | $q=1-p$
+Mean            |$\mu = np$
+Variance        | $\sigma^2=npq$
+Skewness        | $\gamma_1=\dfrac{1-2p}{\sigma}$
+Kurtosis        | $\gamma_2=\dfrac{1}{\sigma^{2}}-\dfrac{6}{n}$
+
+Table: Binomial Distribution
+
+Note that the Bernoulli distribution is a special case of the Binomial distribution: $n=1$
+
+## Probability Mass Function
+
+$$\color[named]{RoyalBlue}{f_X(x;n,p)={n \choose x}p^x(1-p)^{n-x}}$$
+
+Imagine that there is a 40-item multiple-choice test with 4 answer choices in each question. What would the distribution of total correct scores be if each question is answered randomly? 
+
+This question is easily answered in R because of its probability distribution functions. Probability mass functions and probability density functions between with the letter d, followed by an abbreviated name of the distribution. In this case, the probability mass function of the binomial distribution is `dbinom`.
+
+```{r Binomialpmf,pmf=TRUE,fig.showtext=PrettyFont}
+p <- 0.25
+n <- 30
+x <- 0:n
+pmf <- dbinom(x,size = n,prob = p)
+plot(x,pmf,type="b",main=bquote(bold("Binomial PMF " * (italic(p)==.(p) * ", " * {italic(n)==.(n)}))),xlab="Sample Space",ylab="Probability")
+```
+
+## Cumulative Distribution Function
+
+$$\color{BrickRed}{F_X(x;n,p)=\sum_{i=0}^{x}{n \choose i}p^i(1-p)^{n-i}}$$
+
+In R, cumulative distribution functions begin with the letter p, followed by the distribution's abbreviation. In this case, the function is `pbinom`.
+
+```{r Binomialcdf,cdf=TRUE,fig.showtext=PrettyFont}
+cdf <- pbinom(x,size = n,prob = p)
+plot(x,cdf,type="b",ylim=c(0,1),main=bquote(bold("Binomial CDF " * (italic(p)==.(p) * ", " * {italic(n)==.(n)}))),xlab="Sample Space",ylab="Cumulative Probability")
+```
+
+When people wish to score very badly on a test (e.g., to qualify for disability services), they sometimes avoid all correct answers. This graph shows which scores are unlikely even when guessing randomly.
+
+## Generating Random Data
+
+In R, random number generating functions begin with the letter r, followed by the distribution's abbreviation. In this case, the function is `rbinom`.
+
+```{r BinomialRandom,pmf=TRUE,fig.showtext=PrettyFont}
+y <- factor(rbinom(n = SampleSize, size = n, prob = p),levels=x)
+plot(x,as.numeric(table(y)),type="b",
+     main="Empirical Frequencies of Random Binomial Data",xlab="Sample Space",ylab="Frequency")
+text(x,table(y),labels=table(y),pos=3,xpd=TRUE)
+```
+
+# Poisson Distribution
+
+Some events occur at random but have an known average frequency. If each event occurs independently of every other with constant and continuous risk, the total number of events within a particular interval is distributed according to the *Poisson distribution*. A famous example of a natural process that has a Poisson distribution is the number of radioactive atoms that decay in a particular interval.
+
+## Parameters &amp; Descriptives
+
+Property | Symbol
+:---------|:------
+Sample space     | $x \in \mathbb{N}_0$
+Mean|$\lambda \in \mathbb{R}_{>0}$
+Variance  | $\sigma^2=\lambda$
+Skewness  | $\gamma_1=\dfrac{1}{\sqrt{\lambda}}$
+Kurtosis  | $\gamma_2=\dfrac{1}{\lambda}$
+
+Table: Poisson Distribution
+
+## Probability Mass Function
+
+$$\color{RoyalBlue}{f_X(x;\lambda)=\dfrac{\lambda^x}{x!}e^{-\lambda}}$$
+
+```{r PoissonPMF,pmf=TRUE, fig.showtext=PrettyFont}
+x <- 0:20 # sample space actually goes to infinity
+l <- 3
+pmf<- dpois(x,lambda=l) 
+plot(x,pmf,type="b",main="",xlab="Sample Space",ylab="Probability")
+title(main=paste0("Poisson PMF (",intToUtf8(0x03BBL)," = ",l,")"))
+```
+
+
+## Cumulative Distribution Function
+
+$$\color{BrickRed}{F_X(x;\lambda)=\sum_{i=0}^x\dfrac{\lambda^i}{i!}e^{-\lambda}}$$
+
+```{r PoissonCDF,cdf=TRUE, fig.showtext=PrettyFont}
+cdf<- ppois(x,lambda=l)
+plot(x,cdf,type="b",lty=3,main="",xlab="Sample Space",ylab="Cumulative Probability",ylim=c(0,1))
+title(main=paste0("Poisson CDF (",intToUtf8(0x03BBL)," = ",l,")"))
+```
+
+## Generating Random Data
+
+```{r PoissonRandom,pmf=TRUE, fig.showtext=PrettyFont}
+y <- rpois(1000,lambda=l)
+plot(table(factor(y,levels=x)),type="b",
+     xlab="Sample Space",ylab="Frequency")
+title(main=paste0("Empirical Frequencies of Random Poisson Data (",intToUtf8(0x03BBL)," = ",l,")"))
+```
+
+# Uniform Distribution
+
+Like the discrete uniform distribution, the *uniform distribution* has a lower and an upper bound with equal probability for every member of the sample space. However, the sample space of the uniform distribution consists of all real numbers between the lower and upper bounds. It is a continuous distribution, meaning that there are no gaps between the members of the sample space.
+
+```{r continousdiscrete, echo=FALSE,fig.height=2.5,fig.showtext=PrettyFont}
+x <- 2:8
+par(mar=c(3,1,1,1),family=dfont)
+plot(NULL,xlim=c(0,10),ylim=c(0,3),ann=FALSE,axes=FALSE)
+axis(1)
+lines(x,rep(1,length(x)),type="b",lty=3,col="royalblue2",pch=16)
+lines(c(min(x),max(x)),rep(2,2),type="o",lty=1,col="firebrick2",pch=16)
+text(mean(c(min(x),max(x))),1,"Discrete",col="royalblue2",pos=3,cex=2)
+text(mean(c(min(x),max(x))),2,"Continuous",col="firebrick2",pos=3,cex=2)
+```
+
+## Parameters &amp; Descriptives
+
+Property | Symbol
+:---------|:------
+Lower bound     | $a \in \mathbb{R}$
+Upper bound     | $b \in \mathbb{R}; b > a$
+Sample Space    | $x \in [a,b]$
+Mean            | $\mu=\dfrac{a+b}{2}$
+Variance        | $\sigma^2=\dfrac{(b-a)^2}{12}$
+Skewness        | $\gamma_1=0$
+Kurtosis        | $\gamma_2=-\dfrac{6}{5}$
+
+Table: Uniform Distribution
+
+
+## Probability Density Function
+
+$$\color{RoyalBlue}{f_X(x;a,b)=\dfrac{1}{b-a}}$$
+
+A probability mass function function gives actual probabilities that particular sample space members will occur. This is not possible for continuous distribuitons. The probability of any particular value in the sample space is essentially zero. This is weird to think about because particular values occur all the time!
+
+Even though any particular value in a continuous distribution has a probability of zero, it is possible to calculate how probable a score is will occur in any particular region. 
+
+For continuous distributions, the relative probabilities of the sample space are generated by a *probability density function*. The values are scaled so that the total area under the curve will be exactly 1. For example, in the plot below, the uniform distribution between 4 and 6 is 2 units long. In order to make the rectangle have an area of 1, its height must be 0.5.
+
+$$\text{Width} \times \text{Height} = (b-a) \times \frac{1}{b-a} = 1$$
+
+```{r uniform2, echo=FALSE,fig.showtext=PrettyFont,fig.height=2}
+par(pch=16,mar=c(3,1,0.65,1),family=dfont,pin=c(10*0.6,0.6*0.5))
+n <- 1000
+a <- 4
+b <- 6
+h <- 1/(b-a)
+x <- runif(n,a,b)
+y<-runif(n,0,h)
+plot(x,y,type="n",xlim=c(0,10),ylim=c(0,h),axes=FALSE,ann=FALSE)
+axis(1,at=seq(0,10),pos = -0.005)
+points(x,y,cex=0.1,col=rgb(0.1,0.2,1,0.3))
+text(a,h,bquote(italic(a)==.(a)),pos=3,xpd=TRUE)
+text(b,h,bquote(italic(b)==.(b)),pos=3,xpd=TRUE)
+```
+
+Although the probability density function is extremely simple for the uniform distribution, R provides a built-in function to compute it: `dunif(x,a,b)`.
+There are many ways to create a probability density function. I prefer to use the `polygon` function that is filled by setting the `col` parameter.
+
+In this probability density function, the lower bound is 4 and the upper bound is 6. If you were to draw a rectangle by hand, you might start at (4,0) then move up to (4,0.5), then move right to (6,0.5), then move down to (6,0), and then return to (4,0). With the `polygon` function, the last step can be omitted: the first and last points are joined automatically.
+
+Thus, in order, the vertices of the four corners of the rectangle are:
+
+X   | Y
+:--:|:--:
+4   |0
+4   |0.5
+6   |0.5
+6   |0
+
+Table: Vertices of the uniform distribution between 4 and 6
+
+
+```{r UniformPDF, echo=TRUE, fig.showtext=PrettyFont, fig.height=3}
+
+par(pch=16, mar=c(4,4,4,1)+0.1, family=dfont, pin=c(4,0.4))
+a <- 4 # Lower bound
+b <- 6 # Upper bound
+h <- 1/(b-a) # Height of pdf
+x <- c(a,a,b,b) # X-values of rectangle vertices
+y <- c(0,h,h,0) # Y-values of rectangle vertices
+
+plot(NULL, type="n", xlim=c(0,10), ylim=c(0,1), axes=FALSE, xlab= "Sample space",ylab="Density", main="Uniform Probability Density Function") # Empty plot
+axis(1,at=seq(0,10)) # X-axis
+axis(2,at=seq(0,1,0.5),las=1) # Y-axis
+polygon(x,y,bor=NA,col="royalblue") # Polygon
+text(a,h,bquote(italic(a)==.(a)),pos=3,xpd=TRUE) # Label a
+text(b,h,bquote(italic(b)==.(b)),pos=3,xpd=TRUE) # Label b
+```
+
+## Cumulative Distribution Function
+
+$$\color{BrickRed}{F_X(x;a,b)=\dfrac{x-a}{b-a}}$$
+
+```{r UniformCDF, echo=TRUE, fig.showtext=PrettyFont, fig.height=3}
+
+par(pch=16, mar=c(4,4,4,1)+0.1, family=dfont, pin=c(4,0.4))
+a <- 4 # Lower bound
+b <- 6 # Upper bound
+x <- c(a,b,b) # X-values of triangle vertices
+y <- c(0,1,0) # Y-values of triangle vertices
+
+plot(NULL, type="n", xlim=c(0,10), ylim=c(0,1), axes=FALSE, xlab= "Sample space",ylab="Density", main="Uniform Cumulative Distribution Function") # Empty plot
+axis(1,at=seq(0,10)) # X-axis
+axis(2,at=seq(0,1,0.5),las=1) # Y-axis
+polygon(x,y,bor=NA,col="royalblue") # Polygon
+text(a,0,bquote(italic(a)==.(a)),pos=3,xpd=TRUE) # Label a
+text(b,1,bquote(italic(b)==.(b)),pos=3,xpd=TRUE) # Label b
+```
+
+## Generating Random Data
+
+The `runif(n,a,b)` function function will generate *n* random numbers between *a* and *b*.
+
+# Normal Distribution
+
+When a large number of random variables are added together, the resulting total often has a *normal distribution*. When all the variables are independent and identically distributed, this is always true. Because many outcomes are the result of many forces added together, the normal distribution is frequently observed in nature.
+
+Here is a demonstration of how adding more and more Bernoulli trials together $p=0.2$ (i.e., a binomial distribution with size $n$ increasing) creates a distribution that appears increasingly normal.
+
+![Binomial](http://my.ilstu.edu/~wjschne/442/NormalAdding.gif)
+
+## Parameters &amp; Descriptives
+
+Property | Symbol
+:---------|:------
+Sample Space    | $x \in \mathbb{R}$
+Mean            | $\mu\in \mathbb{R}$
+Variance        | $\sigma^2=\in \mathbb{R}_{>0}$
+Skewness        | $\gamma_1=0$
+Kurtosis        | $\gamma_2=0$
+
+Table: Normal Distribution
+
+## Probability Density Function
+
+$$\color{RoyalBlue}{f(X;\mu,\sigma^2)=\frac{1}{\sigma\sqrt{2\pi}}e^{-\frac{1}{2}\left(\frac{X-\mu}{\sigma}\right)^2}}$$
+
+The probability density function of the standard normal distribution $\sim N(0,1)$  is so often used that it gets its own symbol:
+
+$$\phi(z)=\frac{1}{\sqrt{2\pi}}e^{-\frac{1}{2}z^2}$$
+
+Here is a demonstration showing how slicing continuous distributions into smaller and smaller bins, creates a smooth line (i.e., the probability density function)
+
+![Bins](http://my.ilstu.edu/~wjschne/442/NormalBins.gif)
+
+The `dnorm(x,mean,sd)` function in R gives the normal probability density function.
+
+```{r NormalPDF, echo=TRUE, fig.showtext=PrettyFont}
+par(pch=16, mar=c(4,4,4,1)+0.1, family=dfont)
+mu <- 0 # mean
+sigma <- 1 # sd
+x <- seq(mu-4*sigma,mu+4*sigma,length.out=1001) # X-values of polygon
+y <- dnorm(x,mean=mu,sd=sigma) # Y-values of polygon
+plot(NULL, type="n", xlim=c(min(x),max(x)), ylim=c(0,dnorm(mu,mu,sigma)), axes=FALSE, xlab= "Sample space",ylab="Density", main="Normal Probability Density Function") # Empty plot
+axis(1,at=seq(mu-4*sigma,mu+4*sigma,sigma)) # X-axis
+axis(2,las=1) # Y-axis
+polygon(c(min(x),x,max(x)),c(0,y,0),bor=NA,col="royalblue2") # Polygon
+text(mu,dnorm(mu,mu,sigma),bquote(italic(X)*"~"*N(list(.(mu),.(sigma)^2))),pos=3,xpd=TRUE) 
+
+```
+
+## Cumulative distribution function
+
+$$\color{BrickRed}{F_X(x;\mu,\sigma^2)=\int_{-\infty}^{x}\frac{1}{\sigma\sqrt{2\pi}}e^{-\frac{1}{2}\left(\frac{x'-\mu}{\sigma}\right)^2}dx'}$$
+
+The cumulative distribution function of the standard normal distribution $\sim N(0,1)$  is so often used that it gets its own symbol:
+
+$$\Phi(z)=\frac{1}{\sqrt{2\pi}} \int_{-\infty}^{z}e^{\frac{-z'}{2}}dz'$$
+
+In R, the normal cumulative distribution function is `pnorm(x,mean,sd)`.
+
+```{r NormalCDF, echo=TRUE, fig.showtext=PrettyFont}
+par(pch=16, mar=c(4,4,4,1)+0.1, family=dfont)
+mu <- 0 # mean
+sigma <- 1 # sd
+x <- seq(mu-4*sigma,mu+4*sigma,length.out=1001) # X-values of polygon
+y <- pnorm(x,mean=mu,sd=sigma) # Y-values of polygon
+plot(x,y, type="l", xlim=c(min(x),max(x)), ylim=c(0,1), col="firebrick2", axes=FALSE, xlab= "Sample space",ylab="Cumulative Probability", main="Normal Cumulative Distribution Function") 
+axis(1,at=seq(mu-4*sigma,mu+4*sigma,sigma)) # X-axis
+axis(2,las=1) # Y-axis
+text(mu-2*sigma,dnorm(mu,mu,sigma),bquote(italic(X)*"~"*N(list(.(mu),.(sigma)^2))),xpd=TRUE) 
+
+```
+
+## Generating Random Data
+
+Normally distributed random data can be generated with the `rnorm(x,mean,sd)` function.
+
+For example, I used the `rnorm` function to demonstrate the concept of the *distribution of sample means*.
+
+```{r NormalRandom,eval=FALSE}
+#Must install ImageMagick at http://www.imagemagick.org/
+library(animation)
+m<-0
+ym<-0
+
+for (i in 100:300){
+  png(file=paste0("R",i,".png"),bg="white",width=600,height=400,antialias = "default")
+  par(mar=c(3,1,3,1),bg="white")
+  n<-30
+  d1<-rnorm(n)
+  m1<-mean(d1)
+  m<-c(m,m1)
+  ym<-c(ym,0.035*runif(1)*dnorm(m1,0,1/sqrt(n)))
+  s1<-sd(d1)
+  x<-seq(-4,4,0.001)
+  plot(dnorm(x)~x,type="l",axes=F,ann=F,lwd=2,xlim=c(-4,4),ylim=c(0,0.2+dnorm(0)))
+  axis(1)
+  text(-2,dnorm(0)*0.75,bquote(italic(n)==.(n)))
+  text(0,dnorm(0),expression("Population~"*italic(N)(0,1^2)),pos=3)
+  polygon(c(-4,x,4),c(0,dnorm(x,m1,s1)*0.5,0),border=rgb(0,0,1,alpha=0.4),col=rgb(0,0,1,alpha=0.4))
+  text(m1,dnorm(m1,m1,s1)*0.5,bquote("X~"*italic(N)(.(round(m1,2))*","*.(round(s1,2))^2)),pos=3)
+  points(d1,runif(n)*dnorm(d1,m1,s1)*0.5,pch=16,col="blue")
+  points(m[2:length(m)],dnorm(0)+0.08+ym[2:length(m)],pch=16,col=rgb(1,0,0,alpha=0.4))
+  lines(seq(-1,1,0.01),dnorm(0)+0.082+0.035*dnorm(seq(-1,1,0.01),0,1/sqrt(n)),col="red")
+  text(0,dnorm(0)+0.15+0.035*dnorm(0,0,1/sqrt(n)),bquote("DSM~"*italic(N ~ bgroup("(",list(0,bgroup("(",frac(1,sqrt(.(n))),")")^2),")"))),xpd=TRUE)
+  dev.off()
+}
+ani.options(ani.width=600, ani.height=400,interval = 0.5, ani.dev="png", ani.type="png")
+im.convert("R*.png",output="temp.gif",clean=TRUE,cmd.fun = system)
+shell("convert  temp.gif -coalesce  -layers OptimizeFrame  NormalSamples.gif")
+
+
+```
+
+
+![DSM](http://my.ilstu.edu/~wjschne/442/NormalSamples.gif)
+
+# Quantile Functions
+
+The inverse of a cumulative distribution function is the *quantile function*. Whereas all the cumulative distribution functions have a *p* in front of the distribution names, quantile functions have a *q*. For example, the `qnorm` function can answer questions like this one: Which *z*-score in the standard normal distribution $(N(\mu=0,\sigma^2=1))$ separates the bottom 10% from the top 90% of the distribution? Answer: `r qnorm(0.10, 0, 1)`
+
+If we just switch the *x* and *y* axes from the cumulative distribution function, we get the quantile function.
+
+```{r NormalQuantile, echo=TRUE, fig.showtext=PrettyFont}
+par(pch=16, mar=c(4,4,4,1)+0.1, family=dfont)
+mu <- 0 # mean
+sigma <- 1 # sd
+x <- seq(mu-4*sigma,mu+4*sigma,length.out=1001) # X-values of polygon
+y <- pnorm(x,mean=mu,sd=sigma) # Y-values of polygon
+plot(y,x, type="l", ylim=c(min(x),max(x)), xlim=c(0,1), col="firebrick2", axes=FALSE, ylab= "Sample space",xlab="Cumulative Probability", main="Normal Quantile Function") 
+axis(2,at=seq(mu-4*sigma,mu+4*sigma,sigma),las=1) # Y-axis
+axis(1) # X-axis
+text(mu-2*sigma,dnorm(mu,mu,sigma),bquote(italic(X)*"~"*N(list(.(mu),.(sigma)^2))),xpd=TRUE) 
+
+```
+
+
+Other distributions have their analogous quantile functions, as seen in the [summary table](#summary-of-probability-functions) at the bottom of this document.
+
+# *&chi;*^2^ Distribution
+
+When the values of a standard normal variate ($X\sim N(0,1)$) are squared, it forms a $\chi^2$ distribution with 1 degree of freedom.
+
+![From Normal to $\chi$^2](Normal2Chi.gif)
+
+A $\chi^2$ distribution with 2 degrees of freedom is formed when 2 squared standard normal variates are added together. A $\chi^2$ distribution with $k$ degrees of freedom is formed when $k$ squared standard normal variates are added together.
+
+![$\chi^2$ Added Together](ChiSquareAdding.gif)
+
+## Parameters &amp; Descriptives
+
+Property | Symbol
+:---------|:------
+Sample Space    | $x \in \mathbb{R}_{>0}$
+Degrees of freedom| $k \in \mathbb{N}_1$ 
+Mean            | $\mu = k$
+Variance        | $\sigma^2=2k$
+Skewness        | $\gamma_1=\sqrt{\frac{8}{k}}$
+Kurtosis        | $\gamma_2=\frac{12}{k}$
+
+
+## Probability Mass Function 
+
+$\color{RoyalBlue}{f_X(x;k)=\dfrac{x^{k/2-1}e^{-x/2}}{2^{k/2}\Gamma(k/2)}}$
+
+The <a href="http://mathworld.wolfram.com/GammaFunction.html", rel="GammaFunctionBalloon">$\Gamma$ function</a> can be seen as the interpolation of what happens between the integers in the factorial function: $(n-1)!$.
+
+<div class="balloonstyle" id="GammaFunctionBalloon">
+```{r gammafunction,echo=FALSE}
+par(family=dfont,mar=c(5,5,4,1)+0.1)
+x <- seq(0.75,6.04,0.01)
+y <- gamma(x)
+k <- length(x)
+plot(x,y,type="l",col="royalblue2",xlab="X",ylab="",bty="n",las=1,xlim = c(0.5,6.1),ylim=c(0,125),main="Gamma Function")
+title(ylab=expression(Gamma(x)),family="serif")
+factx <- 1:7
+points(factx,gamma(factx),pch=16,col="royalblue2")
+arrows(x[2],y[2],x[1],y[1],length = 0.1,col="royalblue2")
+arrows(x[k-1],y[k-1],x[k],y[k],length = 0.1,col="royalblue2",xpd=T)
+labelsX=parse(text=paste(factx-1, "*'!'==",gamma(factx), sep=""))
+text(factx,gamma(factx),labels=labelsX,pos=c(rep(3,4),2,2))
+```
+
+</div>
+
+The `dchisq` function gives the probability density function for the $\chi^2$ distribution. Here is a plot of of a $\chi^2$ distribution with 6 degrees of freedom.
+
+```{r chipdf,fig.showtext=PrettyFont}
+par(mar=c(5,5,4,1)+0.1,family=dfont)
+k <- 6 # Degrees of freedom
+x <- seq(0,k+5*sqrt(2*k),0.001) # Sample space
+pdfChi <- dchisq(x,df = k)
+plot(x,pdfChi,type="n",axes=F,bty="n",xlab="Sample Space",ylab = "") # Empty plot
+polygon(c(min(x),x,max(x)),c(0,pdfChi,0),border=NA,col="royalblue2")
+axis(1)
+axis(2,las=1)
+title(ylab="Density",line = 3.5)
+title(main=bquote(chi^2*(italic(df)==.(k))),family="serif")
+```
+
+
+## Cumulative Distribution Function
+
+$\color{BrickRed}{F_X(x;k)=\dfrac{\gamma\left(k/2,x/2\right)}{\Gamma(k/2)}}$
+
+Where $\gamma()$ is the [incomplete lower gamma function](http://en.wikipedia.org/wiki/Incomplete_gamma_function).
+
+The `pchisq` function gives the cumulative distribution function for the $\chi^2$ distribution. Here is a plot of of a $\chi^2$ cumulative distribution with 6 degrees of freedom.
+
+```{r chicdf,fig.showtext=PrettyFont}
+par(mar=c(5,5,4,1)+0.1,family=dfont)
+k <- 6 # Degrees of freedom
+x <- seq(0,qchisq(0.999,k),0.01) # x-values
+cdfChi <- pchisq(x,df = k) # y-values
+plot(x,cdfChi,type="l",axes=F,bty="n",xlab="Sample Space",ylab = "",col="firebrick2",lwd=2) # Empty plot
+axis(1)
+axis(2,las=1)
+title(ylab="Cumulative Proportion",line = 3.5)
+title(main=bquote(chi^2*(italic(df)==.(k))),family="serif")
+```
+
+# Summary of Probability Functions
+
+Distribution|Density/Mass|Cumulative|Quantile|Random
+:-----------|:----------:|:--------:|:------:|:----:
+Discrete Uniform|`1/n`|`(x-a+1)/n`|`ceiling(q*n+a-1)`|`sample`
+Bernoulli|`dbinom`|`pbinom`|`qbinom`|`rbinom`
+Binomial |`dbinom`|`pbinom`|`qbinom`|`rbinom`
+Poisson  |`dpois` |`ppois` |`qpois` |`rpois`
+Uniform  |`dunif` |`punif` |`qunif` |`runif`
+Normal   |`dnorm` |`pnorm` |`qnorm` |`rnorm`
+*&chi;*^2^ |`dchisq`|`pchisq`|`qchisq`|`rchisq`
+*t*      |`dt`    |`pt`    |`qt`    |`rt`
+*F*      |`df`    |`pf`    |`qf`    |`rf`
+
+***
+To make this tutorial, I drew on many sources, including [Wolfram MathWorld](http://mathworld.wolfram.com), [Wikipedia](http://en.wikipedia.org), and many (mostly anonymous) people who offered their advice on R-related matters.

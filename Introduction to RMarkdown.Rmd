@@ -1,0 +1,180 @@
+---
+title: "Introduction to R Markdown"
+author:
+  affiliation: Illinois State University
+  email: wjschne@ilstu.edu
+  name: W. Joel Schneider
+date: "January 12, 2015"
+output:
+  word_document:
+    reference: APA.docx
+  pdf_document: default
+  html_document:
+    css: APAStyle.css
+    fig_caption: yes
+    highlight: zenburn
+    theme: null
+bibliography: citations.bib
+csl: apa.csl
+abstract: This is a brief introduction to R Markdown.
+---
+
+**Note**: In order to compile this document, save the following files to the same folder as [this document](http://my.ilstu.edu/~wjschne/442/Introduction%20to%20RMarkdown.Rmd):
+
+* [APA.docx](http://my.ilstu.edu/~wjschne/442/APA.docx) This file is a template to create MS Word documents in APA Style. The template is a work in progress and thus does not get everything exactly right.
+* [APAStyle.css](http://my.ilstu.edu/~wjschne/442/APAStyle.css) This file provides APA-like styling for HTML output. You can make .css files to format text and other HTML elements in almost any way you want.
+* [apa.csl](http://my.ilstu.edu/~wjschne/442/apa.csl) This file tells R Markdown how to format citations in APA Style.
+* [citations.bib](http://my.ilstu.edu/~wjschne/442/citations.bib) This file contains a few citations in BibTeX format.
+
+# R Markdown
+
+[Markdown](http://daringfireball.net/projects/markdown/basics) is a really simple way to format documents. [R Markdown](http://rmarkdown.rstudio.com/) is a variant of Markdown that works in [RStudio](http://www.rstudio.com/).
+
+# This is a Level 1 header
+
+This is a regular paragraph. Extra       spaces between words are eliminated.
+Even though this 
+sentence is broken
+across many lines, 
+it is
+grouped with the text
+above it.
+
+Put an empty line between paragraphs.
+
+You can't see them but if you put 2 or more spaces  
+at the end  
+of a line,  
+there is a line break.
+
+## This is a Level 2 header
+
+### Guess which level header this is!
+
+# Formatting text
+
+*This is italicized.*
+
+**This is bolded.**
+
+~~Strikethrough~~
+
+Superscript^2^
+
+>This is for blockquotes.
+>It can go on for 
+>many
+>lines.
+>
+>This is the second paragraph in a blockquote. In my .css file, I  have formatted it so that it will be indented.
+
+
+
+```
+Text enclosed in three backquotes (```) will appear in a monospace type. It will appear exactly 
+as
+   you 
+       type it,
+without the typical formatting.
+
+For example,
+*normally this would be italicized.*
+```
+
+# Lists
+Let's make an unordered list
+
+* First bullet point
+* Second bullet point
+    - Indented bullet point (2 tabs or 4 spaces)
+    - Another indented bullet point
+        + Further indentation (4 tabs or 8 spaces)
+
+Let's make an ordered list
+
+1. My first topic
+    1. Sub topic 1
+    2. Sub topic 2
+2. My second topic
+    * Subtopic (2 tabs or 4 spaces)
+    * Another subtopic    
+    This is a indented paragraph in the middle of a list (2 tabs or 4 spaces).
+    * Yet another subtopic
+3. My third topic
+
+
+# Links
+
+[This is a link to my homepage.](http://my.ilstu.edu/~wjschne/)
+
+# Images
+
+![Ryan, Joel, and Jane](http://my.ilstu.edu/~wjschne/RyanJoelJane.jpg)
+
+# Equations using $\LaTeX$
+
+$$f(X)=\dfrac{1}{\sigma\sqrt{2\pi}}e^{-\frac{1}{2}\left(\dfrac{X-\mu}{\sigma}\right)^2}$$
+
+# Simple Tables
+
+Left        |Center         |Right
+:-----------|:-------------:|------------:
+1           |2              |3            
+4           |5              |6            
+7           |8              |9            
+
+# Combining R and Markdown
+
+## R code chunks
+
+```{r}
+EvenNumbersUnder100<-seq(2,98,2)
+```
+
+This code chunk will run but it will not appear in the document.
+
+```{r,echo=FALSE}
+X<-cos(pi)
+```
+
+This code chunk will appear in the document but it will not run.
+
+```{r,eval=FALSE}
+Y<-tan(pi/4)
+```
+
+## Inline R code
+
+You can refer to calculations in your text. For example, the cosine of $\pi$ radians is `r cos(pi)`. In fact, you can refer to any R object (e.g., the mean and standard deviation of a variable.)
+
+## Let's make a pretty plot with R:
+
+```{r,dev='svg',echo=-1}
+# If converting to Word, change dev to png.
+par(family = "serif")
+x <- 0:20
+y <- dpois(x,lambda = 3)
+plot(y~x,type="b",col="royalblue2",lty=3,pch=19,main=expression("Poisson Distribution "*(lambda == 3)),xlab="Sample Space",ylab="Probability",bty="n",las=1)
+```
+
+## APA Formatted tables!
+```{r,results='asis'}
+n<-1000 #Sample size
+g<-rnorm(n) #Normal variate
+s1<-g+rnorm(n) #Correlated variate
+s2<-g+rnorm(n) #Correlated variate
+d<-cbind(g,s1,s2) #Bind columns into a matrix
+dcor<-round(cor(d),2) #Correlation matrix (rounded to 2 digits)
+dcor[lower.tri(dcor,diag=TRUE)]<-"" #Remove lower triangle
+knitr::kable(dcor,align = "c") #Make table with centered columns
+```
+
+# Citations
+
+As explained [here](http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html), if you use the bibliography tag, you can insert citations with the @ symbol and the citation's unique ID. A variety of citation file formats are supported and a huge number of citation styles are [available](https://zotero.org/styles). I am using the [BibTeX file format](http://www.bibtex.org/) with the [APA (6^th^ Edition) citation style](https://zotero.org/styles/apa).
+
+For example, here are some recent papers of mine [@schneider2013principles; @kahn2013s]. In this paper, @schneider2013if [p. 186-187] says a bunch of stuff. 
+
+ Tools like these make managing references much, much easier than doing it all by hand. The references below appear like magic, all perfectly formatted.
+
+# References

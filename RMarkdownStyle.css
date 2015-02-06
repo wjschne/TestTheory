@@ -1,0 +1,133 @@
+@import url(http://fonts.googleapis.com/css?family=Playfair+Display:400,400italic,700,700italic,900,900italic);
+
+@import url(http://fonts.googleapis.com/css?family=Source+Code+Pro);
+
+@import url(http://fonts.googleapis.com/css?family=Inconsolata);
+
+body {
+    margin:auto;
+    font-family:"Playfair Display",Times,serif;
+    font-size:16pt;
+    text-align:left;
+    max-width:6.5in
+}
+
+table {
+    border-collapse:collapse;
+    border-bottom:1px solid #000;
+    margin:auto;
+    width:80%
+}
+
+th,td {
+    padding-bottom:5px;
+    padding-top:5px;
+    padding-left:10px;
+    padding-right:10px;
+    vertical-align:top
+}
+
+.references p {
+    padding-left:2.5em;
+    text-indent:-2.5em
+}
+
+h4.author em,h4.date em,h4.author_afil em {
+    text-align:left;
+    font-weight:400;
+    font-style:normal
+}
+
+caption {
+    font-size:1.5em;
+    text-align:left
+}
+
+blockquote p {
+    text-indent:0;
+    margin-left:2.5em
+}
+
+blockquote p + p {
+    text-indent:2.5em
+}
+
+pre,img {
+    max-width:100%
+}
+
+img {
+    display:block;
+    margin-left:auto;
+    margin-right:auto;
+    box-shadow:2px 2px 5px #888;
+    -moz-box-shadow:2px 2px 5px #888;
+    -webkit-box-shadow:2px 2px 5px #888;
+    -khtml-box-shadow:2px 2px 5px #888
+}
+
+pre {
+    overflow-x:auto
+}
+
+code {
+    font-family:"Inconsolata", monospace;
+    border:none;
+}
+
+pre code {
+    font-size:.9em;
+    font-family:'Source Code Pro', monospace;;
+    text-align:left;
+    display:block;
+    padding:.5em;
+    border:1px solid #ccc
+}
+
+code.r {
+    font-family:'Inconsolata', monospace;
+    font-size:1.2em;
+    background-color:rgba(160,160,160,0.2);
+    border:1px solid #ccc;
+    text-align:left;
+    padding:5px;
+    font-size:92%
+}
+
+sup,sub {
+    position:relative;
+    vertical-align:0
+}
+
+sup {
+    bottom:.4em
+}
+
+sub {
+    top:.4em
+}
+
+.header th {
+    border-bottom:1px solid #000;
+    border-top:1px solid #000
+}
+
+.balloonstyle{
+position:absolute;
+top: -500px;
+left: 0;
+visibility: hidden;
+z-index: 100;
+background-color: LightGray;
+width: 630px;
+text-align:left;
+padding:15px;
+border-radius:15px;
+font-size:14pt;
+margin:10px auto;
+/*Remove below line to remove shadow. Below line should always appear last within this CSS;*/
+filter: progid:DXImageTransform.Microsoft.Shadow(color=gray,direction=135,Strength=5);
+}
+
+.balloonstyle img {max-width:600px;margin:0px,padding:0px}
+

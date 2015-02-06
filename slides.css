@@ -1,0 +1,158 @@
+@import url(http://fonts.googleapis.com/css?family=Playfair+Display:400,400italic,700,700italic,900,900italic);
+
+
+@import url(http://fonts.googleapis.com/css?family=Noto+Serif:400,400italic,700,700italic&subset=latin,greek,latin-ext);
+
+@import url(http://fonts.googleapis.com/css?family=Source+Code+Pro);
+
+@import url(http://fonts.googleapis.com/css?family=Inconsolata);
+
+.reveal {
+  font-family:"Playfair Display", "Noto Serif", serif;
+  font-weight:400
+}
+
+.reveal p {
+  font-size:.7em
+}
+
+.reveal li {
+  font-size:.7em
+}
+
+.reveal h1 {
+  word-wrap:normal;
+  -moz-hyphens:none;
+  -epub-hyphens:none;
+  font-family:"Playfair Display Black", "Noto Serif", serif;
+  font-weight:900;
+  letter-spacing:normal;
+  text-shadow:1px 1px rgba(80,80,80,0.5);
+  font-size:2em
+}
+
+.reveal h2 {
+  word-wrap:normal;
+  -moz-hyphens:none;
+  -epub-hyphens:none;
+  font-family:"Playfair Display Black", "Noto Serif", serif;
+  font-weight:900;
+  letter-spacing:normal;
+  text-shadow:1px 1px rgba(80,80,80,0.5);
+  font-size:1.5em
+}
+
+.reveal h3 {
+  word-wrap:normal;
+  -moz-hyphens:none;
+  -epub-hyphens:none;
+  font-family:"Playfair Display Black", "Noto Serif", serif;
+  font-weight:900;
+  letter-spacing:normal;
+  text-shadow:1px 1px rgba(80,80,80,0.5);
+  font-size:2em;
+  text-align:center
+}
+
+.reveal h4 {
+  word-wrap:normal;
+  -moz-hyphens:none;
+  -epub-hyphens:none;
+  font-family:"Playfair Display Black", "Noto Serif", serif;
+  font-weight:900;
+  letter-spacing:normal;
+  text-shadow:1px 1px rgba(80,80,80,0.5);
+  font-size:1.125em
+}
+
+.section .reveal .state-background {
+  background:#505050;
+  background:rgba(80,80,80,0.8)
+}
+
+.reveal pre code {
+  font-size:.9em;
+  font-family:"Source Code Pro", monospace
+}
+
+.reveal .r {
+  font-family:Inconsolata, monospace;
+  font-size:1.2em;
+  background-color:#a0a0a0;
+  background-color:rgba(160,160,160,0.2);
+}
+
+.midcenter {
+  position:fixed;
+  top:50%;
+  left:50%
+}
+
+.footer {
+  color:#000;
+  background:#E8E8E8;
+  position:fixed;
+  top:90%;
+  text-align:center;
+  width:100%
+}
+
+.mediaOnly p img {
+  display:block;
+  margin-left:auto;
+  margin-right:auto
+}
+
+.mediaInline p img {
+  display:block;
+  margin-left:auto;
+  margin-right:auto
+}
+
+
+.reveal table {
+    border-collapse:collapse;
+    border:0px solid #000;
+    border-bottom:1px solid #000;
+    margin:auto;
+    width:80%
+}
+
+.reveal table td {
+    padding-bottom:5px;
+    padding-top:5px;
+    padding-left:10px;
+    padding-right:10px;
+    vertical-align: top;
+    border: 0px solid #000
+}
+
+.reveal table th {
+    border: 0px solid #000;
+    border-bottom:1px solid #000;
+    border-top:1px solid #000;
+    padding-bottom:5px;
+    padding-top:5px;
+    padding-left:10px;
+    padding-right:10px;
+    vertical-align:top
+}
+
+.reveal .CenterMe {text-align: center}
+
+.balloonstyle{
+position:absolute;
+top: -500px;
+left: 0;
+visibility: hidden;
+z-index: 100;
+background-color: LightGray;
+width: 12em;
+text-align:left;
+padding:10px;
+border-radius:15px;
+font-size:14pt;
+margin:10px auto;
+/*Remove below line to remove shadow. Below line should always appear last within this CSS*/
+filter: progid:DXImageTransform.Microsoft.Shadow(color=gray,direction=135,Strength=5);
+}

@@ -1,0 +1,84 @@
+---
+title: "Covariance & Correlation"
+author: "W. Joel Schneider"
+date: "[Test Theory (Psychology 442)](http://my.ilstu.edu/~wjschne/442/Psy442SP15.html)"
+output:
+  slidy_presentation:
+    widescreen: yes
+    incremental: no
+    css: slidy.css
+    footer: Test Theory
+---
+```{r, include=FALSE}
+knitr::opts_chunk$set(dev="svg", fig.width=10, fig.height = 7.5,tidy=TRUE,tidy.opts=list(blank=FALSE, width.cutoff=40), echo=FALSE, family="serif")
+```
+
+# Setup
+
+To compile this presententation using RStudio, save the [markdown document](http://my.ilstu.edu/~wjschne/442/MatrixAlgebraInR.Rmd) and the [slidy.css](http://my.ilstu.edu/~wjschne/442/slidy.css) file into the same folder and then make that folder your working directory. Click *Knit HTML*.
+
+# Relationships
+
+There is an infinite variety of ways in which two variables can be related. The correlation coefficient measures just one way, linear relationships. If two variables have a non-linear relationship, the correlation coefficient will measure the degree to which there is a linear trend. In some cases, this results in only minor distortion whereas in others, complete obfuscation.
+
+```{r,echo=FALSE,message=FALSE,eval=FALSE}
+set.seed(21)
+library(tikzDevice)
+library(shape)
+rb2a <- rgb(67/255, 100/255, 238/255, 0.2) 
+fb2a <- rgb(238/255, 44/255, 44/255, 0.2) 
+
+ArrHead <- function(x,y,ends=3,...){
+  require(shape)
+  k <- length(x)
+  if(ends!=2) Arrows(x[1],y[1],x[2],y[2],code = 1,...)
+  if(ends!=1) Arrows(x[k-1],y[k-1],x[k],y[k],code = ,...)
+}
+
+"%+%" <- function(...){
+paste0(...,sep="")
+}
+
+f <- "VariableRelationships"
+tikz(f %+% ".tex",standAlone=TRUE,width=6,height=6)
+
+par(pch=16,bty="n",pty="s",mfcol=c(2,2),mar=c(3,1,3,0),las=1,family="serif",cex.main=2,cex.lab=2,cex.axis=1.5)
+n <- 1000
+x <- rnorm(n)
+e <- rnorm(n)
+linear <- function(x) 0.8*x
+y1 <- linear(x) + e 
+plot(x,y1,col=rb2a,cex=0.5,xlim = c(-4,4),main="$\\hat{Y}=0.8X$",xlab="",ylab="")
+f1 <- curve(linear,from=-3,to=3,add=TRUE,col="royalblue2",lwd=2)
+ArrHead(f1$x,f1$y,col="royalblue2",arr.length=0.2)
+
+
+quadratic <- function(x) x^2 -4*x + 2
+y2 <- quadratic(x) + 2*e
+plot(x,y2,col=rb2a,cex=0.5,xlim = c(-4,4),main="$\\hat{Y}=X^2-4X+2$",lwd=2,xlab="",ylab="")
+f2 <- curve(quadratic,from=-3,to=3,add=TRUE,col="royalblue2")
+ArrHead(f2$x,f2$y,col="royalblue2",arr.length=0.2)
+abline(lm(y2~x),col=fb2a)
+
+y3 <- exp(x)+e
+plot(x,y3,col=rb2a,cex=0.5,xlim = c(-4,4),main="$\\hat{Y}=e^X$",lwd=2,xlab="",ylab="")
+f3 <- curve(exp,from=-3,to=3,add=TRUE,col="royalblue2",lwd=2)
+ArrHead(f3$x,f3$y,col="royalblue2",xpd=TRUE,arr.length=0.2)
+
+sinf <- function(x) sin(x*2)
+y4 <- sinf(x) + 0.5*e
+plot(x,y4,col=rb2a,cex=0.5,xlim = c(-4,4),main="$\\hat{Y}=\\sin (2X)$",lwd=2,xlab="",ylab="")
+f4 <- curve(sinf,from=-3,to=3,add=TRUE,col="royalblue2",lwd=2)
+ArrHead(f4$x,f4$y,col="royalblue2",arr.length=0.2)
+
+dev.off()
+tools::texi2dvi(f %+% ".tex",pdf=TRUE,clean = TRUE)
+
+# Using pdf2svg (http://www.cityinthesky.co.uk/opensource/pdf2svg/) 
+shell("pdf2svg " %+% f %+% ".pdf " %+% f %+% ".svg")
+pander::openFileInOS(f %+% ".svg")
+```
+
+![Variable Relationships](VariableRelationships.svg)
+
+Fortunately, with a bit of tweaking we can get the correlation coefficient to measure almost any kind of relationship but that is beyond the scope of this presentation.

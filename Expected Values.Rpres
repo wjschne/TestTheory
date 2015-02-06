@@ -1,0 +1,89 @@
+```{r cacheset, include=FALSE}
+opts_chunk$set(cache=TRUE)
+```
+
+The Algebra of Expected Values
+========================================================
+author: W. Joel Schneider
+date: Psychology 442
+transition: none
+incremental: false
+css: slides.css
+
+
+```{r setup,echo=FALSE,message=FALSE}
+# slides.css is here: https://www.dropbox.com/s/lci000xtt934zw0/slides.css?dl=0
+```
+
+Expected Value
+==========================
+
+$\mathrm{E}(X)$ is the *expected value* of $X$
+
+$$\mathrm{E}(X) = \mu_X$$
+
+
+Expected Value (finite sample space)
+========================
+
+
+$X$ is a discrete random with $x \in \{x_1, x_2,...x_k\}$.
+
+$x$ has probability $p$
+
+$$\mathrm{E}(X) = \sum\limits_{i=1}^{k} {x_i p_i}=\mu_X$$
+
+Expected Value (countable sample space)
+========================
+
+$X$ is a discrete random with $x \in \{x_1, x_2,...\}$.
+
+$$\mathrm{E}(X) = \sum\limits_{i=1}^{\infty} {x_i p_i}=\mu_X$$
+
+Expected Value (continuous sample space)
+========================
+
+$X$ is a continous random with with $x \in \{\mathbb{R}\}$.
+
+$f_X(x)$ is the probability density function of $X$.
+
+$$\mathrm{E}(X) = \int_{-\infty}^{\infty} {xf_X(x)dx}=\mu_X$$
+
+Expected Value Operator
+================================
+
+$$
+\begin{align}
+& \text{Expected value of a constant} &\mathrm{E}(k)&=k\\[2ex]
+& \text{Expected value of a variable plus a constant}& \mathrm{E}(X+k)&=\mathrm{E}(X) + \mathrm{E}(k)\\
+& & &=\mathrm{E}(X) + k\\[2ex]
+&\text{Expected value of the product of a contant and a variable} & \mathrm{E}(kX)&=k\mathrm{E}(X)\\[2ex]
+&\text{Expected value of the sum of two variables} & \mathrm{E}(X+Y)&=\mathrm{E}(X)+\mathrm{E}(Y)\\[2ex]
+&\text{Expected value of the product of two variables} & \mathrm{E}(XY)&=\mathrm{E}(X)\mathrm{E}(Y)+\sigma_{XY}\\
+\end{align}$$
+
+Moments 
+================
+title: false
+
+$$\small{
+\begin{array}{l|c|c|c|c|c}
+\hline
+ & \mathrm{Raw \atop Moment}  & \mathrm{Central\atop Moment} & \mathrm{Standardized\atop Moment} & \mathrm{Cumulant} &  \mathrm{Standardized\atop Cumulant} \\ \hline
+1^{st} & \eqalign{\mathrm{E}(X)&=\mu_1'\\ &=\mu\\ } &  \eqalign{\mathrm{E}(X-\mu)&=\mu_1\\ &=0}  & \eqalign{\mathrm{E}\left(\dfrac{X-\mu}{\sigma}\right)&=\mu_1\\ \mathrm{E}(z)&=0} & \kappa_1=\mu & \dfrac{\kappa_1}{\sqrt{\kappa_2^1}}=\dfrac{\mu}{\sigma}  \\
+2^{nd} & \mathrm{E}(X^2)=\mu_2' &  \eqalign{\mathrm{E}((X-\mu)^2)&=\mu_2\\ &=\sigma^2} & \mathrm{E}(z^2)=1  & \kappa_2=\sigma^2 & \dfrac{\kappa_2}{\sqrt{\kappa_2^2}}=1 \\
+3^{rd} & \mathrm{E}(X^3)=\mu_3' & \mathrm{E}((X-\mu)^3)=\mu_3 & \eqalign{\mathrm{E}(z^3)&= \dfrac{\mu_3}{\sigma^3}\\&=\gamma_1} & \kappa_3=\mu_3  & \dfrac{\kappa_3}{\sqrt{\kappa_2^3}}=\gamma_1 \\
+4^{th} & \mathrm{E}(X^4)=\mu_4' & \mathrm{E}((X-\mu)^4)=\mu_4 & \mathrm{E}(z^4)= \dfrac{\mu_4}{\sigma^4} & \kappa_4=\mu_4 - 3\sigma^4 &  \dfrac{\kappa_4}{\sqrt{\kappa_2^4}}=\gamma_2 \\
+n^{th} & \mathrm{E}(X^n)=\mu_n' & \mathrm{E}((X-\mu)^n)=\mu_n & \mathrm{E}(z^n)= \dfrac{\mu_n}{\sigma^n} & \eqalign{&\kappa_n =\mu_n'\\ &\tiny{-\sum\limits_{m=1}^{n-1}{\binom{n-1}{m-1}\kappa_m\mu_{n-m}'}}} & \dfrac{\kappa_n}{\sqrt{\kappa_2^n}}=\gamma_{n-2} \\ \hline
+\end{array}}
+$$
+
+Descriptives and Moments
+================================
+
+Statistic | Moments/Cumulants | Formula
+:--------:|:--------:|:--------:
+Mean $(\mu)$|1^st Raw Moment <br> 1^st Cumulant | $$\mathrm{E}(X)=\mu_1'=\mu\\[2ex] \kappa_1$$
+Variance $(\sigma^2)$| 2^nd Central Moment <br> 2^nd Cumulant | $$\mathrm{E}\left(\left(X-\mu\right)^2\right)=\mu_2\\[2ex] \kappa_2$$
+Skewness $(\gamma_1)$| 3^rd Standardized Moment <br> 3^rd Standardized Cumulant | $$\mathrm{E}\left(z^3\right)=\dfrac{\mu_3}{\sigma^3}\\[2ex] \dfrac{\kappa_3}{\sqrt{\kappa_2^3}}$$
+Kurtosis $(\gamma_2)$| 4^th&nbsp;Standardized&nbsp;Moment&nbsp;&minus;&nbsp;3 <br> 4^th Standardized Cumulant | $$\mathrm{E}\left(z^4\right)-3=\dfrac{\mu_4}{\sigma^4}-3\\[2ex] \dfrac{\kappa_4}{\sqrt{\kappa_2^4}}$$

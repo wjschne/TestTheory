@@ -1,0 +1,230 @@
+---
+title: "Classical Test Theory & Reliability"
+author: "W. Joel Schneider"
+date: Test Theory
+output:
+  slidy_presentation:
+    widescreen: yes
+    incremental: yes
+    css: slidy.css
+    footer: Test Theory
+---
+
+```{r setup,echo=FALSE,message=FALSE}
+# slides.css is here: https://www.dropbox.com/s/lci000xtt934zw0/slides.css?dl=0
+library(knitr)
+library(shape) # Load the shape library (install if necessary)
+fast<-TRUE # TRUE: Compile quickly; FALSE: Better quality
+
+if (fast) {
+  dfont = "serif" # Default font for quick compile
+  fastDev="png"  # Default image device for quick compile
+  knitr::opts_chunk$set(dev="png", fig.width=10, fig.height = 7.5, echo=FALSE)
+
+} else {
+ dfont = "play" # Default font for slow compile
+ fastDev="svg" # Default image device for slow compile
+ library(showtext) # Often causes a JSON error. Try again immediately.
+ font.add.google("Playfair Display", "play") 
+ # font.add.google("Noto Serif", "noto")   
+ 
+ knitr::opts_chunk$set(dev="svg", fig.width=10, fig.height = 7.5,fig.showtext=TRUE,tidy=TRUE,tidy.opts=list(blank=FALSE, width.cutoff=40), echo=FALSE, family=dfont)
+}
+
+iGreek <- function(s="alpha",bq=FALSE){
+  strGreek <- c("alpha", "beta", "gamma", "delta", "epsilon", "zeta", "eta", "theta", "iota", "kappa", "lambda", "mu", "nu", "xi", "omicron", "pi", "rho", "sigma", "tau", "upsilon", "phi", "chi", "psi", "omega","Alpha", "Beta", "Gamma", "Delta", "Epsilon", "Zeta", "Eta", "Theta", "Iota", "Kappa", "Lambda", "Mu", "Nu", "Xi", "Omicron", "Pi", "Rho", "Sigma", "Tau", "Upsilon", "Phi", "Chi", "Psi", "Omega")
+  intGreek <- c(945:961,963:969,913:937)
+  names(intGreek)<-strGreek
+  if(bq) bquote(italic(.(intToUtf8(intGreek[s])))) else intToUtf8(intGreek[s])
+  
+}
+
+rb2a <- rgb(67/255, 100/255, 238/255, 0.2) 
+fb2a <- rgb(238/255, 44/255, 44/255, 0.2) 
+
+NormalPolygon<-function(mu=0,sigma=1,lb=mu-4*sigma,ub=mu+4*sigma,borcol=NA,color="royalblue2",height=dnorm(mu,mu,sigma),nPoints=1000,add=TRUE){
+  if(add) {plot(NULL,xlim=c(lb,ub),ylim=c(0,height),axes=F,ann=F)}
+  if(is.na(color)==F){
+    x<-c(lb,seq(lb,ub,length.out=nPoints),ub)
+    y<-height*dnorm(x,mu,sigma)/dnorm(mu,mu,sigma)
+    y[c(1,length(x))]<-0
+    polygon(x,y,border=NA,col=color) 
+  }
+  
+  if(is.na(borcol)==F){
+    x<-seq(lb,ub,length.out=nPoints)
+    y<-height*dnorm(x,mu,sigma)/dnorm(mu,mu,sigma)
+    lines(x,y,col=borcol)
+  }
+}
+
+
+"%+%" <- function(...){
+paste0(...,sep="")
+}
+```
+
+# Constructs 
+
+
+#### Theory vs. Operationalization {.CenterMe}
+
+# Individual Differences
+
+
+#### States vs. Traits
+
+# Scores
+
+
+#### Manifest vs. Latent
+
+# True Scores
+
+#### Aristotelian vs. Psychometric True Scores
+
+$$X=T+E$$
+
+```{r TrueScore,eval=FALSE}
+library(tikzDevice)
+library(shape)
+"%+%" <- function(...){
+paste0(...,sep="")
+}
+
+f <- "TrueScores"
+tikz(f %+% ".tex",standAlone=TRUE,width=6,height=6*0.60)
+par(mar=c(3,1,2,1),family="serif")
+mu <- 100 # Population mean
+sigma <- 15 # Population SD
+NormalPolygon(100,15,color = rb2a) # See function in setup chunk
+text(mu,dnorm(mu,mu,sigma),"$\\mu="%+%mu%+%"$",pos=3,xpd=TRUE,col="royalblue4",cex=1.5) # mu label
+Arrows(x0 = mu, y0 = dnorm(mu+sigma,mu,sigma), x1 = mu + sigma, y1 = dnorm(mu+sigma,mu,sigma),arr.adj = 1,col="royalblue4") # Show arrow from mean to +1 SD
+text(mu+sigma,dnorm(mu+sigma,mu,sigma),"$\\sigma=" %+% sigma %+% "$",pos=4,xpd=TRUE,col="royalblue4",cex=1.5) # sigma label
+
+rxx <- 0.90 # Reliability
+sigma_e <- sigma * sqrt(1-rxx) # Standard Error of Measurement
+sigma_t <- sigma * sqrt(rxx) # True score SD
+t <- 120 # True score
+
+
+n <- 10000 # Sample Size
+x <- rnorm(n,t,sigma_e) # test scores
+h <- 0.4*dnorm(mu,mu,sigma) / dnorm(t,t,sigma_e) # height corrective
+y <- runif(n)*dnorm(x,t,sigma_e)*h
+points(x,y,pch=16, col=fb2a ,cex=0.4)
+text(t,dnorm(t,t,sigma_e)*h,labels = "$t="%+%t%+%"$",col = "firebrick4",pos=3,cex=1.5) # True score label
+Arrows(x0 = t, y0 = h*dnorm(t+sigma_e,t,sigma_e), x1 = t + sigma_e, y1 = h*dnorm(t+sigma_e,t,sigma_e),arr.adj = 1,col="firebrick4",arr.length = 0.2) # Show arrow from mean to +1 SD
+
+text(t+sigma_e,h*dnorm(t+sigma_e,t,sigma_e),"$\\sigma_E="%+%round(sigma_e,2)%+%"$",pos=4,xpd=TRUE,col="firebrick4",cex=1.5) # SEM label
+
+axis(1,at=seq(mu-4*sigma,mu+4*sigma,sigma))
+
+text(mu-2.5*sigma,0.8*dnorm(mu,mu,sigma),"$\\rho_{XX}=\\frac{\\sigma_T^2}{\\sigma_X^2}=\\frac{"%+% (rxx * sigma^2) %+% "}{"%+% sigma^2 %+% "}="%+% rxx %+% "$",cex=1.5)
+
+dev.off()
+tools::texi2dvi(f %+% ".tex",pdf=FALSE,clean = TRUE)
+
+# Using pdf2svg (http://www.cityinthesky.co.uk/opensource/pdf2svg/) 
+shell("pdf2svg " %+% f %+% ".pdf " %+% f %+% ".svg")
+```
+
+![True Scores](TrueScores.svg)
+
+# True Score and Error Means
+
+$$\begin{aligned}X&=T+e\\[3ex]
+\mathrm{E}(e)&=0\\[3ex]
+\mathrm{E}(X)&=\mathrm{E}(T+e)\\
+&=\mathrm{E}(T)+\mathrm{E}(e)\\
+&=\mathrm{E}(T)\\[3ex]
+\mu_X&=\mu_T
+\end{aligned}$$
+
+# True Score Variance
+
+$$\begin{aligned}\tilde{X}&=X-\mu_X\\
+\tilde{T}&=T-\mu_T\\[2ex]
+\mathrm{E}(\tilde{X}^2)&=\mathrm{E}((\tilde{T}+e)^2)\\
+&=\mathrm{E}(\tilde{T}^2+2\tilde{T}e+e^2)\\ 
+&=\mathrm{E}(\tilde{T}^2)+2\mathrm{E}(\tilde{T}e)+\mathrm{E}(e^2)\\
+&=\mathrm{E}(\tilde{T}^2)+2 \cdot 0+\mathrm{E}(e^2)\\
+\sigma_X^2&=\sigma_T^2+\sigma_e^2\\
+\end{aligned}$$
+
+# Correlation between Parallel Forms
+
+$X_i$ & $X_j$ have the same true score and equal error variances.
+
+$$T_i=T_j, \sigma_{X_i} = \sigma_{X_j},\sigma_{e_i} = \sigma_{e_i}$$
+
+$$\rho_{T_i e_i}=\rho_{T_j e_j}=\rho_{e_i e_j}=0$$
+
+$$\begin{aligned}\rho_{ij}&=\dfrac{\sigma_{ij}}{\sqrt{\sigma_i^2\sigma_j^2}}\\&=\dfrac{\mathrm{E}(\tilde{X_i}\tilde{X_j})}{\sqrt{\mathrm{E}(\tilde{X_i}^2)\mathrm{E}(\tilde{X_j}^2)}}\\
+&=\dfrac{\mathrm{E}(\tilde{X_i}\tilde{X_j})}{\sqrt{\sigma_{X_i}^2\sigma_{X_j}^2}}\\
+&=\dfrac{\mathrm{E}((\tilde{T_i}+e_i)(\tilde{T_j}+e_j))}{\sigma_{X_i}\sigma_{X_j}}\\
+&=\dfrac{\mathrm{E}(\tilde{T_i}\tilde{T_j}+\tilde{T_i}e_j+\tilde{T_j}e_i+e_ie_j))}{\sigma_{X_i}\sigma_{X_j}}\\
+&=\dfrac{\mathrm{E}(\tilde{T_i}\tilde{T_j})+\mathrm{E}(\tilde{T_i}e_j) +\mathrm{E}(\tilde{T_j}e_i)+\mathrm{E}(e_ie_j)}{\sigma_{X_i}\sigma_{X_j}}\\
+&=\dfrac{\mathrm{E}(\tilde{T}^2)+0+0+0}{\sigma_{X_i}\sigma_{X_j}}\\
+&=\dfrac{\sigma_T^2}{\sigma_{X_i}\sigma_{X_j}}\\
+&=\dfrac{\sigma_T^2}{\sigma_X^2}\end{aligned}$$
+
+# Reliability
+
+$$\rho_{XX}=\frac{\sigma_T^2}{\sigma_X^2}=\frac{\text{True Score Variance}}{\text{Observed Score Variance}}$$
+
+# Standard Error of Measurment
+
+$$\begin{aligned}\sigma_X^2&=\sigma_T^2+\sigma_E^2\\[2ex]
+\sigma_E^2&=\sigma_X^2-\sigma_T^2\\
+&=\frac{\sigma_X^2}{\sigma_X^2}\sigma_X^2-\sigma_T^2\\
+&=\sigma_X^2\frac{\sigma_X^2-\sigma_T^2}{\sigma_X^2}\\
+&=\sigma_X^2\left(\frac{\sigma_X^2}{\sigma_X^2}-\frac{\sigma_T^2}{\sigma_X^2}\right)\\
+&=\sigma_X^2\left(1-\rho_{XX}\right)\\[2ex]
+\sigma_E&=\sigma_X\sqrt{1-\rho_{XX}}
+\end{aligned}$$
+
+```{r SEM,eval=FALSE}
+
+library(tikzDevice)
+library(mvtnorm)
+library(shape)
+library(animation)
+"%+%" <- function(...){
+paste0(...,sep="")
+}
+
+f <- "StandardErrorOfMeasurement"
+cnt <- 1000
+for (t in 85:86){
+  f1 <- "StandardErrorOfMeasurement" %+% cnt
+tikz(f %+% ".tex",standAlone=TRUE,width=6,height=6)
+par(family="serif",pty="s")
+mu <- 100 # Population mean
+sigma <- 15 # Population SD
+rxx <- 0.9
+oX <- t
+X <- rmvnorm(1000,c(mu,mu),matrix(c(1,rxx,rxx,1)*sigma^2,nrow=2))
+plot(X,pch=16,col=rb2a,cex=0.2,bty="n",xlab="$X_1$",ylab="$X_2$",las=1,axes=F,main="$\\mathrm{Standard\\,Error\\,o\\,Measurement\\,}(\\sigma_E^2)$")
+axis(1,at=seq(mu-4*sigma,mu+4*sigma,sigma))
+axis(2,at=seq(mu-4*sigma,mu+4*sigma,sigma),las=1)
+b1 <- rxx 
+b0 <- mu-b1*mu
+abline(b0,b1,col="royalblue4",lwd=2)
+points(X[round(X[,1])==oX,],cex=0.2,col=fb2a)
+dev.off()
+#capture.output(shell("pdflatex -output-format dvi " %+% f %+% ".tex"))
+tools::texi2dvi(f %+% ".tex",pdf=FALSE,clean = TRUE)
+shell("dvipng -q -D 1200 -T tight -bg Transparent -o " %+% f1 %+% ".png " %+% f %+% ".dvi")
+
+#tools::texi2dvi(f %+% ".tex",pdf=TRUE,clean = TRUE)
+cnt <- cnt + 1
+}
+
+ani.options(ani.width=600, ani.height=600,interval = 0.5, ani.dev="png", ani.type="png")
+im.convert(f %+% "*.png",output="temp.gif",clean=TRUE,cmd.fun = system)
+shell("convert  temp.gif -coalesce  -layers OptimizeFrame " %+% f %+% ".gif")
+# Using pdf2svg (http://www.cityinthesky.co.uk/opensource/pdf2svg/) 
+#shell("pdf2svg " %+% f %+% ".pdf " %+% f %+% ".svg")
+```
+

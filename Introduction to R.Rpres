@@ -1,0 +1,631 @@
+Introduction to R
+========================================================
+author: W. Joel Schneider
+date: Psychology 442
+transition: none
+incremental:true
+transition-speed: fast
+css: slides.css
+
+Psychology is next!
+========================================================
+
+![Rising Tide](RisingTide.jpg)
+
+History of R
+=====================
+
+**S** was created by John Chambers while at Bell Labs in the 70s.
+
+### Two modern flavors of **S**
+
++ **R** was created by **R**oss Ihaka & **R**obert Gentleman of the University of Auckland in the 90s.
++ **S+** is a commercial product from [SolutionMetrics](http://www.solutionmetrics.com.au/products/splus/default.html)
+
+
+
+Getting Started
+========================================================
+1. [Install R](http://cran.rstudio.com)
+2. [Install RStudio](http://www.rstudio.com/products/rstudio/download/)
+3. Use RStudio to control R.
+
+R is a (fancy) calculator
+=====================
+type:section
+
+Basic operations in R
+========================================================
+Addition
+```{r}
+4+2
+```
+
+Subtraction
+```{r}
+6-2
+```
+
+Basic operations in R
+========================================================
+Multiplication
+```{r}
+3*4
+```
+
+Division
+```{r}
+8/4
+```
+
+Basic operations in R
+========================================================
+Exponentiation
+```{r}
+4^2
+```
+
+Square Root
+```{r}
+sqrt(9)
+9^0.5
+```
+
+Logical Tests and Operators
+=======================
+type:section
+
+Logical Tests
+=======================
+Test for equality
+```{r}
+5==5
+1==2
+```
+
+Test for inequality
+```{r}
+5!=5
+1!=2
+```
+
+The AND operator: &
+=========================
+```{r}
+TRUE & TRUE
+TRUE & FALSE
+6 < 4 & 10 > 5
+```
+
+The OR operator: |
+========================
+```{r}
+TRUE | TRUE
+TRUE | FALSE
+TRUE | TRUE
+FALSE | FALSE
+```
+
+Assign variables
+========================================================
+You can use the = sign:
+```{r}
+X = 5
+```
+Oldtimers like me use arrows:
+```{r}
+x <- 4  
+5 -> y
+```
+Capitalization matters
+```{r}
+x == X #X and x are not the same.
+```
+
+Vectors
+==========
+type: section
+
+Making vectors with the c function
+=============================
+```{r}
+x <- c(1,2,3)
+z <- c("First","Second","Third")
+```
+
+Display vectors
+=============================
+To both assign and print, use parentheses.
+```{r}
+(y <- c(4,5,6))
+```
+To display a previously assigned variable, just put it alone on a line.
+```{r}
+y
+```
+
+Sequence vectors (Colon operator)
+=============================
+Integer sequences
+```{r}
+1:5
+```
+Backward integer sequences
+```{r}
+2:-3
+```
+
+Sequence vectors (seq function)
+=============================
+seq(*start*,*end*,*interval*)
+```{r}
+seq(2,10,2) #Even numbers between 2 and 10
+seq(20,0,-5) #Count down by 5
+```
+Sequence with a specfic number of elements
+```{r}
+seq(0,2,length.out=5)
+```
+
+Repeating vectors
+=================
+Repeat 6 four times.
+```{r}
+rep(6,4)
+```
+
+Repeat x vector twice.
+```{r}
+rep(x,2)
+```
+
+Vector length
+=============================
+How many elements in a vector?
+```{r}
+length(x)
+```
+
+Elementwise operations
+=============================
+Addition
+```{r}
+x + y
+```
+Subtraction
+```{r}
+x - y
+```
+
+Elementwise operations
+=============================
+Multiplication
+```{r}
+x * y
+
+```
+Division
+```{r}
+x / y
+```
+
+Elementwise operations
+=============================
+Square roots (and most functions) work elementwise.
+```{r}
+sqrt(x)
+```
+Exponentiation
+```{r}
+x^2
+```
+
+Scalar multiplication
+=============================
+10 is a single-element vector that loops over the other vector.
+```{r}
+10*x
+```
+Generalization: Shorter vectors loop over longer vectors.
+```{r}
+1:9*c(0.1,1,10)
+```
+
+Inner Product
+=============================
+$$\huge \color{red}x \times \color{blue}y = \color{red}1 \times \color{blue}4 + \color{red}2 \times \color{blue}5 + \color{red}3 \times \color{blue}6$$
+```{r}
+x %*% y
+sum(x*y)
+```
+
+Outer Product
+=============================
+Two methods:
+```{r}
+x %o% y 
+x %*% t(y)
+```
+
+Vector to single-row matrix
+=================
+The *t* function transposes vectors and matrices.
+```{r}
+t(x) #Does not change x unless you say x<-t(x)
+```
+*Dim* function changes the dimensions
+```{r}
+dim(x)<-c(1,3)
+x
+```
+
+Vector to single-column matrix
+=================
+Double transpose
+```{r}
+t(t(1:3)) # Sloppy but it works!
+```
+Using *dim* with *length* is generalizable to any length.
+```{r}
+dim(x)<-c(length(x),1)
+x
+```
+
+Naming elements
+==========================
+```{r}
+x<-1:3
+names(x)<-c("Bob","Sally","Sue")
+x
+```
+
+Selecting elements
+================================
+First element of x
+```{r}
+x[1]
+```
+First and third elements of x
+```{r}
+x[c(1,3)]
+```
+Find named elements
+```{r}
+x[c("Bob","Sue")]
+```
+
+Excluding elements
+================================
+Remove the first and third elements of x
+```{r}
+x[c(-1,-3)]
+```
+Remove even elements
+```{r}
+seq(1,10)[-1*seq(2,10,2)]
+```
+
+Conditional selection
+================================
+Elements of x < 3
+```{r}
+x[x<3]
+```
+Elements < 3 and > 1
+```{r}
+x[x<3&x>1]
+```
+Names beginning with S
+```{r}
+x[substr(names(x),1,1)=="S"]
+```
+
+Matrices
+===========
+type:section
+
+Create a matrix
+================================
+```{r}
+matrix(1:9, nrow=3, byrow=TRUE)
+#If byrow is unspecified, the matrix is assigned by columns
+matrix(1:9, nrow=3)
+```
+
+Naming rows and columns
+================================
+```{r}
+A<-matrix(1:9, nrow=3, byrow=TRUE)
+colnames(A)<-c("Gold","Silver","Bronze")
+rownames(A)<-c("Sun","Planet","Moon")
+A
+```
+
+Matrix sums
+================================
+```{r}
+rowSums(A) #Row sums
+colSums(A) #Column sums
+sum(A) #Overal sum
+```
+
+Select rows of a matrix
+================================
+```{r}
+A[1,] #First row (A single row becomes a vector)
+A[1,,drop=FALSE] #Keep single row as a matrix
+```
+
+Select columns of a matrix
+================================
+```{r}
+A[,3,drop=FALSE] #Third column 
+A[,colSums(A)>13] #Columns with sums > 13
+```
+
+Select submatices
+================================
+```{r}
+A[1,3] #First row, third column
+A[1:2,c("Gold","Bronze")] # First two rows of Gold and Bronze columns
+```
+
+Matrix Operations
+=======================
+```{r}
+A+A #Addition (Subtraction: A-A)
+A*A #Elementwise multiplication (Elementwise division: A/A)
+```
+
+Matrix Operations
+=======================
+```{r}
+S<-matrix(c(1,0.5,0.5,1),nrow=2);S #Make a symmetric square matrix
+det(S) #Determinant
+S %*% S #Matrix Multiplication
+```
+
+Combine rows and columns
+=======================
+Combine two rows (also works with matrices)
+```{r}
+rbind(1:3,4:6)
+```
+
+Combine a column and a matrix
+```{r}
+cbind(5:6,S)
+```
+
+Matrix Operations
+=======================
+Inverse
+```{r}
+solve(S)
+```
+Eigenvalues and Eigenvectors
+```{r}
+eigen(S)
+```
+
+3 ways to use the diag function
+=======================
+Create an identity matrix with a single integer.
+```{r}
+diag(2) #2 by 2 identity matrix
+```
+Create a diagonal matrix with a vector. 
+```{r}
+diag(c(4,2))
+```
+Return the diagonal of a matrix.
+```{r}
+diag(A)
+```
+
+Matrix Operations
+=======================
+Transpose
+```{r}
+t(A) #Transpose
+```
+Stack all column vectors into a single vector
+```{r}
+c(A)
+```
+
+Data Types
+===========
+type:section
+
+Logical data
+=============
+T and F are shortcuts for TRUE and FALSE
+```{r}
+c(T,F,TRUE,FALSE)
+```
+Expressions that evaluate to true or false are logical vectors.
+```{r}
+1:10>5
+```
+
+Integer data type
+==================
+An *L* after the integer makes it an integer.
+```{r}
+c(1L,2L,3L)
+```
+
+Numeric data
+===============
+This is the default data type for numbers.
+```{r}
+c(1,2,4.5,pi)
+```
+All numbers, even integers, are numeric by default.
+```{r}
+class(c(1,2,3))
+```
+Complex data type
+==========================
+$$i = \sqrt{-1}$$
+```{r}
+6+2i
+exp(1i*pi)
+```
+The Beauty Equation:
+$$e^{i\pi}+1=0$$
+
+Character (AKA string or text)
+=====================================
+Enclose in single or double quotes.
+```{r}
+s<-c('If', "love", "is", "a", "gift", "from", "the", "blind", "to", "the", "deaf,", "then", "I'm", "a", "whole", "note", "rest", "on", "the", "treble", "clef.")
+```
+Concatenate string vectors with the *cat* function.
+```{r}
+cat(c("Those", "who", "aspire", "to", "sound", "smart", "usually", "sound" ,"somewhat","silly,", "and", "sometimes","straight-out","stupid."))
+```
+
+Character constants
+=====================================
+Constant|Meaning
+:-------|:------
+\n  |newline
+\r	|carriage return
+\t	|tab
+\\	|backslash \
+\'	|ASCII apostrophe '
+\"	|ASCII quotation mark "
+\u03BC | `r "\u03BC"` (UTF-8)
+
+Data conversion
+=======================================
+```{r}
+as.logical(c(0L,1,pi))
+as.integer(c(-2.1,-1.9,F,T,2.9,pi))
+as.numeric(c(T,1L))
+as.complex(c(T,4L,pi))
+as.character(c(T,4L,round(pi,2),3+2i))
+```
+
+Initializing vectors
+======================
+```{r}
+x <- logical(10) #Default = FALSE
+y <- numeric(3) #Default = 0 (also for integer and complex)
+z <- character(5) #Default = ""
+```
+
+
+Factors
+======================
+Factors are text stored as numbers. 
+
+There are two types of factors.
+
+- Unordered for nominal variables
+- Ordered for ordinal variables
+
+The plot function has different defaults for factors vs. numeric variables.
+
+Factors
+======================
+Make a vector of 10000 integers between 1 and 3 and convert to a Likert scale. Note that the order is ```TRUE```.
+
+```{r,echo=FALSE}
+set.seed(122270)
+```
+
+```{r}
+A <- sample(1:3, size = 10000, replace = TRUE, prob = c(0.6,0.1,0.3))
+fA<-factor(A, levels=1:3, labels=c("Agree", "Neutral", "Disagree"),ordered=TRUE)
+```
+
+```{r,echo=FALSE}
+d<-data.frame(ID=seq(1,length(A)),Numeric=A, Factor=fA) #Make data frame
+knitr::kable(head(d)) # Generate markdown table
+```
+***
+Plot factor data.
+````{r,dev='svg',fig.height=4,fig.width=4}
+plot(fA)
+```
+
+Vectors (and matrices) have the same data type.
+===================
+This becomes an integer vector.
+```{r}
+c(FALSE,F,T,2L)
+```
+This becomes a numeric vector.
+```{r}
+c(FALSE,T,2L,3.2)
+```
+This becomes a character vector.
+```{r}
+c(FALSE,T,2L,3.2,"Hello!")
+```
+
+Lists
+=============
+A list is a collection of vectors of any type.
+```{r}
+list(TRUE,2,"Hello")
+```
+The list items can be vectors of varying lengths
+```{r}
+list(c(T,F,T),1:5,c("Hello","Goodbye"))
+```
+
+Lists with named elements
+==========================
+```{r}
+MyFamily <- list(parents=c("Max","Marilyn"), siblings=c("Paula", "Rosanne","Leslie", "Nedra", "Kristen", "Hollee", "Becca"), spouse="Renee", children=c("Ryan"))
+MyFamily
+```
+
+Store complex data with lists of lists (of lists of lists...)
+=======================================
+```{r}
+MyData <- list(Name="W. Joel Schneider",email="wjschne@ilstu.edu", courses=c(138,442,432,464), family=MyFamily)
+MyData
+```
+
+Data frames
+===================
+- Like matrices, data frames have 2 dimensions: rows and columns
+- Like lists, the columns can be of different data types
+- Unlike lists, the columns must have the same number of rows. This means that missing data is coded as *NA*.
+
+Data frames
+==================
+left:60%
+
+Create and summarize data frame.
+```{r}
+SampleSize <- 1000
+Treatment <- factor(sample(1:2,SampleSize, replace = TRUE), labels=c("Untreated", "Treated"))
+Anxiety <- rnorm(SampleSize,65,10) - (as.numeric(Treatment)-1)*15
+summary(d <- data.frame(Anxiety, Treatment))
+```
+***
+```{r,dev='svg',fig.height=5,fig.width=4}
+plot(Anxiety~Treatment, data=d, main="Compare treatment groups")
+```
+
+Hello
+==============
+```{r, echo=FALSE, dev='svg'}
+# par(col=rgb(0.1,0.2,1,0.2),pch=16,mar=c(4,1,0,1))
+n <- 10000
+x <- rnorm(n,100,15)
+IQ <- round(x)
+yOffset <- rnorm(n,0,0.005)+1.2
+yNorm<-runif(n,0,1)*dnorm(x,100,15)/dnorm(100,100,15)
+plot(x,yNorm,type="n",xlim=c(40,160),ylim=c(0,1.3),axes=FALSE,ann=FALSE)
+axis(1,at=seq(40,160,15),labels = seq(40,160,15),pos = 1.2)
+points(x,yOffset,cex=0.1)
+axis(1,at=seq(40,160,15),pos = -0.005)
+points(x,yNorm,cex=0.1)
+```
