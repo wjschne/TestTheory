@@ -1,0 +1,170 @@
+---
+title: "Homework 1 (Psychology 442)"
+author: "Your Name Here"
+output:
+  html_document:
+    fig_align: center
+    fig_caption: yes
+    fig_height: 4.875
+    fig_width: 6.5
+    theme: null
+    css: RMarkdownStyle.css
+---
+```{r setup, echo=FALSE}
+# Sets defaults for compiling the document
+knitr::opts_chunk$set(dev="svg", tidy=TRUE,tidy.opts=list(blank=TRUE, width.cutoff=40))
+```
+
+Note: The css file that accompanies this markdown document is [here](http://my.ilstu.edu/~wjschne/442/RMarkdownStyle.css). Download it and save it to the same folder in which this file is saved.
+
+# Instructions
+
+* Use R Markdown to complete your assignment. 
+* Use R to perform all calculations.
+* Submit your markdown source document via ReggieNet.
+* When I run your markdown document, it should display your answers properly. For example, if I ask, "What is 4 + 4?" your answer should be something like this:
+
+What is 4 + 4? `r 4+4`
+
+You can also refer to R objects like this:
+
+Suppose that the question is "What is the sum of all 2-digit positive even integers?" 
+
+```{r, echo=FALSE}
+X <- sum(seq(10,98,2))
+```
+
+You should write: 
+
+What is the sum of all 3-digit positive even integers? `r X`
+
+# Exercises
+
+1. What are the positive odd integers under 10?
+2. What is the probability that if you flip 10 coins that exactly 3 will be heads?
+3. If you flip 20 coins, what is the probability that 7 or fewer will be heads?
+4. Guess which distribution (with which parameter value(s)) the variable `MysteryVar` has in [this file](http://my.ilstu.edu/~wjschne/442/Guess.csv).
+
+    Hint: Reading a dataset from a .csv file is easy: 
+    ```{r readcsv, eval=FALSE}
+d <- read.csv("http://my.ilstu.edu/~wjschne/442/Guess.csv")
+names(d) #Find out the names of the variables in d
+freqs <- table(d$MysteryVar) #Frequecies of MysteryVar
+probs <- freqs / sum(freqs) #Probabilities of MysteryVar
+```
+
+    A. What is the mean of `MysteryVar`?
+    
+    B. What is the standard deviation of `MysteryVar`?
+    
+5. Imagine that the frequency distribution table of the following variable is as follows:
+   
+    |X  | Freq|
+    |:--|----:|
+    |0  |    1|
+    |1  |    9|
+    |2  |   21|
+    |3  |   38|
+    |4  |   43|
+    |5  |   79|
+    |6  |   73|
+    |7  |   63|
+    |8  |   46|
+    |9  |   41|
+    |10 |   21|
+    |11 |    8|
+    |12 |    8|
+    |13 |    3|
+    |14 |    2|
+    
+    Table: Frequency Distribution Table
+
+    A. What is the mean of this distribution? (see Equation 2.2, p. 19)
+    
+    $$\mu_X=\dfrac{\sum\limits_{i=1}^k{f_i x_i}}{N}$$
+    
+    Where  
+    $x_i$ is element $i$ in the sample space of variable $X$  
+    $f_i$ is the frequency of $x_i$  
+    $k$ is the number of elements in the sample space
+    $N$ is the sample size $(\sum{f_i})$  
+
+    B. What is the standard deviation? (see Equation 2.6, p. 21)
+    
+    $$\sigma_X=\sqrt{N^{-1}\sum\limits_{i=1}^{k}{f_i (x_i-\mu_X)^2}}$$
+
+6. Suppose that a normal distribution has a mean of 65.5 and a standard deviation of 5.4 (i.e., $X \sim N(\mu_X,\sigma_X^2)$.
+
+A. What is the *z*-score associated with a value of 78.9?
+    
+    B. What proportion of this distribution is less than 61?
+    
+    C. Make a graph of this distribution and show the proportion that is greater than 72.2.
+    
+    Hint: Here is an example of how to display the proportion of the standard nromal distribution between -1 and 1.
+    
+    ```{r HintNormal}
+mu <- 0 # Mean
+sigma <- 1 # Standard deviation
+LB <- -1 # Lower bound
+UB <- 1 # Upper bound
+x <- seq(-5,5,0.001) # x-values of the normal distribution
+y <- dnorm(x,mean = mu, sd = sigma) # y-values of normal distribution
+par(mar=c(3,0,4,0),family="serif") # Set margins and font family
+plot(x,y,type="n",axes=F,ann=F) # Make empty plot but with proper dimensions
+title(main=paste0("Area under the standard normal curve between ",LB," and ",UB)) # Add title
+axis(1) # Make x-axis
+fillx <- seq(LB,UB,0.001) # x-values of the filled polygon
+filly <- dnorm(fillx,mean = mu, sd = sigma) # y-values of the filled polygon
+fillx <- c(min(fillx),fillx,max(fillx)) # Append min and max values
+filly <- c(0,filly,0) # Append zeroes
+polygon(fillx, filly, col = "royalblue2", bor= NA) # Make polygon with no border
+lines(x, y, col="royalblue4") # Draw whole normal distribution
+
+# This is not required, but annotations make the plot much better
+AUC <- pnorm(UB,mu,sigma)-pnorm(LB,mu,sigma) # Area under the curve
+text(x=(UB+LB)/2,y=0.5*dnorm(0,mu,sigma),paste0("Area = \n",round(100*AUC,2),"%"))
+text(LB,dnorm(LB,mu,sigma),paste0("LB = ",LB),pos=2) # Show lower bound
+text(UB,dnorm(UB,mu,sigma),paste0("UB = ",UB),pos=4) # Show upper bound
+text(mu,dnorm(mu,mu,sigma),bquote(mu == .(mu)),pos=3,xpd=TRUE) # Show mean
+sigma_y <- dnorm(mu+sigma,mu,sigma) # height of curve at +1 SD
+text(mu+sigma/2,sigma_y,bquote(sigma==.(sigma)),pos=3) # Show SD
+library(shape) # Load the shape library (install if necessary)
+Arrows(x0 = mu, y0 = sigma_y, x1 = mu + sigma, y1 = sigma_y,arr.adj = 1) # Show arrow from mean to +1 SD
+
+```
+    
+7. Suppose that the mean high school GPA of undergraduate applicants at ISU is $\mu = 2.79$ with $\sigma = 0.68$. Among ISU Freshmen, first semester GPA has $\mu = 2.90$ with $\sigma = 0.61$. The correlation between sigh school GPA and first-semester GPA at ISU is $\rho=0.58$. We are going to use a regression equation to predict first-semester college GPA from high school GPA.
+
+    A. Calculate the intercept of the regression equation $(b_0)$.
+    
+    B. Calculate the slope $(b_1)$.
+    
+    C. Calculate the predicted GPA for someone with a 3.5 high school GPA $(\hat{Y})$.
+    
+    D. Calculate the standard error of the estimate $(\sigma_e)$. 
+    
+    E. What proportion of applicants with a high school GPA of exactly 2.0 will have a first semester GPA of 2.0 or higher?
+
+# Practical application
+
+Suppose that a therapist begins treating an adult male client who has panic attacks that come at unpredictable times. Some weeks there are no panic attacks and some weeks there are many, but on average he has 2 panic
+attacks each week. The client knows this because he has kept detailed
+records in a spreadsheet for the last 5 years. The therapist plots the frequencies and intuits that it follows a Poisson distribution.
+
+![Panic](http://my.ilstu.edu/~wjschne/442/Panic.svg)
+
+The client had sought treatment once before, but terminated early and abruptly because, according to him, “It wasn’t working.” After sensitive querying, it was discovered that he expected that treatment should have quickly reduced the frequency of panic attacks to zero. When that did not happen, he became discouraged and stopped the treatment. Because the client is well educated and quantitatively inclined, the therapist decides to use the data he has collected as part of the intervention to help create a more realistic set of expectations. Imagine that after 5 sessions, the average number of panic attacks is likely to be 1 per week. After 10 sessions, the average number of panic attacks is likely to be 0.5 per week.
+
+- Use R and Markdown to help a therapy client to have more realistic expectations about how often he is likely to have panic attacks if treatment is only partially successful. Write as if you are the therapist. 
+- Use the Poisson distribution to create three graphs to show how often he is likely to have 0 to 10 panic attacks currently $(\lambda = 2)$, after 5 sessions $(\lambda = 1)$, and after 10 sessions $(\lambda = 0.5)$. 
+- Create a table to show that even though the frequency of panic attacks is decreasing, there will still be weeks in which there are two or more panic attacks. The table should compare how often he is likely to have 2 or more panic attacks in a week at current rates, after 5 sessions, and after 10 sessions. 
+- In your explanation, make sure that you use headings, italics and bold font at least once.
+- At the end of your explanation, make a bullet point list of at least 3 links to sites that have useful information about panic attacks.
+
+Put your explanation below this line:
+
+***
+
+
+

@@ -1,0 +1,141 @@
+---
+title: "Homework 2 (Psychology 442)"
+author: "Your Name Here"
+output:
+  html_document:
+    fig_align: center
+    fig_caption: yes
+    fig_height: 4.875
+    fig_width: 6.5
+    theme: null
+    css: RMarkdownStyle.css
+---
+```{r setup, echo=FALSE}
+library(knitr)
+# Sets defaults for compiling the document
+opts_chunk$set(dev="svg", tidy=TRUE,tidy.opts=list(blank=TRUE, width.cutoff=40))
+```
+
+Note: The css file that accompanies this markdown document is [here](http://my.ilstu.edu/~wjschne/442/RMarkdownStyle.css). Download it and save it to the same folder in which this file is saved.
+
+# Exercises
+
+1. Generate 10000 cases of a variable with an $F(2,14)$ distribution. Show the distribution in a plot.
+2. Create 100 variables with the same distribution and sample size $\sim F(2,14)$. Create a variable that is the sum of all 100 variables. Show the distribution in a plot.
+
+    *Hint*: Here is how to add many normal variates together. You can adapt the code to the question above as needed.
+
+    ```{r HintRandom,tidy=FALSE}
+    k <- 20 # Number of variables
+    n <- 10000 # Sample size
+
+    # Create a matrix with k columns and n rows:
+    m <- matrix(rnorm(k*n, mean=10, sd=3), ncol=k) 
+
+    # Total across rows
+    kTotal <- rowSums(m)
+
+    # Show the kernal density
+    plot(density(kTotal))
+    ```
+
+
+Here is an alternate way of doing the same thing using the pipe operator `%>%` from the `magrittr` package. Basically, the pipe operator inserts the results whatever is before the operator into the first slot of the function that is after the operator. It makes the code more readable, without having to create so many variables. Keyboard shortcut: `Ctrl+Shift+M`
+
+```{r HintPipe,tidy=FALSE,eval=FALSE}
+library(magrittr)
+rnorm(k*n,mean=10,sd=3) %>%
+  matrix(ncol=k) %>%
+  rowSums %>%
+  density %>%
+  plot
+```
+
+The above code reads:
+
+    First generate random data in a vector,
+    then put it in a matrix with k columns,
+    then sum the rows of the matrix,
+    then calculate the densities of the sample space,
+    and last make a density plot of the total.
+
+3. Generate 1000 cases from 3 random variables from different distributions (e.g., 1 Binomial, 1 *F*, and 1 Poisson). The parameters can be of your choosing. Create a total score from the three variables. Show that the sum of the means is the mean of the sums. Also show the expected population means using information from [this tutorial](http://my.ilstu.edu/~wjschne/442/SimulatingRandomData.html). Make a table like this and fill in the missing cells:
+
+&nbsp;                  |Variable 1 | Variable 2 | Variable 3 | Sum
+------------------------|-----------|------------|------------|---------
+Distribution            |           |            |            |
+Parameters              |           |            |            |
+Population Mean $(\mu)$ |           |            |            |
+Sample Mean $(m)$       |           |            |            |
+
+
+4. Generate 100,000 cases from 2 standard normal variates that have a correlation of 0.64. Show that the variance of the sum of these variables is equal to the sum of the covariance of the variables.
+
+*Hint*: To create 2 standard normal variates that correlate at a particular value, we can use many different methods (including the `rmvnorm` function from the `mvtnorm` package). We will create them from scratch because it aids understanding. We will create three standard normal variates: a general factor $g$ and 2 specific factors, $S_1$ and $S_2$. We will add $g$ and $S_1$ create $X_1$ and $g$ and $S_2$ will create $X_1$ like so:
+    
+![Little Model](http://my.ilstu.edu/~wjschne/442/LittleModel.png)
+
+The particular coefficients will make $X_1$ and $X_2$ standard normal as well. That is, the squared coefficients added together equal 1: 
+
+$$(\sqrt{\rho})^2+(\sqrt{1-\rho})^2=\rho + 1 - \rho = 1$$
+
+Note that the correlations between $g$, $S_1$, $S_2$ are 0:
+
+&nbsp;| $g$|$S_1$|$S_2$
+:-----|:--:|:---:|:---:
+$g$   |1   |0    |0
+$S_1$ |0   |1    |0
+$S_2$ |0   |0    |1
+
+Table: Correlation matrix
+
+
+&nbsp;|$X_1$          |$X_2$
+:-----|:-------------:|:-----------:
+$g$   |$\sqrt{\rho}$  |$\sqrt{\rho}$
+$S_1$ |$\sqrt{1-\rho}$|0
+$S_2$ |0              |$\sqrt{1-\rho}$
+
+Table: Weight matrix
+
+
+```{r HintCorrelatedNormals, tidy=FALSE}
+n <- 100000 # sample size
+k <- 3 # number of standard normal variates
+rho  <- 0.64 # Correlation between x1 and x2
+
+xi <- matrix(rnorm(n*k),ncol=k) # 3 Standard normal variates
+colnames(xi) <- c("g","s1","s2") # column names
+
+xi_cor <- diag(k) # Correlation of xi (an identity matrix)
+
+# Make the weight matrix for X1 and X2
+w <- rbind(
+  c(sqrt(rho), sqrt(rho)),
+  c(sqrt(1-rho), 0),
+  c(0,sqrt(1-rho))
+  )
+colnames(w) <- c("x1","x2")
+rownames(w) <- c("g","s1","s2")
+
+kable(w,caption = "Weight Matrix")
+
+RHO <- t(w) %*% xi_cor %*% w # Expected correlation matrix
+
+knitr::kable(RHO,caption = "Expected correlation matrix")
+
+x  <- xi  %*% w # Use weighted sums to create x1 and x2
+R  <- cor(x) # observed correlation matrix
+kable(R,caption="Observed correlation matrix",digits = 2)
+
+# This is all easy with the mvtnorm package:
+library(mvtnorm)
+x <- rmvnorm(n, sigma=matrix(c(1,rho,rho,1),nrow=2))
+colnames(x) <- c("x1","x2")
+
+```
+
+5. From the question above, show the population correlation matrix of all six variables
+    $\{g, S_1, S_2, X_1, X_2, X_1 + X_2\}$.
+
+*Hint:* The column vector for $g$ in the $3 \times 6$ weight matrix is $\{1,0,0\}$. Figure out what the other 5 column vectors are and this problem is not so very hard.
